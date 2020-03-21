@@ -130,6 +130,20 @@ def tokenize(fname):
 # トークナイザ  完了
 #
 
+#
+# コード生成
+#
+
+def gen( node ):
+    if node.kind == NodeKind.ND_NUM :
+        print( '\tpush {0}'.format( node.val ) )
+        return
+    
+    return
+#
+# コード生成　完了
+#
+
 def consume(op):
     if tkn[0].kind != TokenKind.TK_RESERVED or tkn[0].str != op :
         return False
@@ -160,15 +174,24 @@ print('#print tkn')
 for t in tkn:
     print("#'{0}' , '{1}', '{2}'".format(t.kind, t.val, t.str) )
 
+###############################################
 mynode = expr()
 
-print( "root kind={0} val={1}".format(mynode.kind, mynode.val) )
-print( "left kind={0} val={1}".format(mynode.lhs.kind, mynode.lhs.val) )
-print( "rght kind={0} val={1}".format(mynode.rhs.kind, mynode.rhs.val) )
-print( "left left kind={0} val={1}".format(mynode.lhs.lhs.kind, mynode.lhs.lhs.val) )
-print( "left rght kind={0} val={1}".format(mynode.lhs.rhs.kind, mynode.lhs.rhs.val) )
-print( "rght left kind={0} val={1}".format(mynode.rhs.lhs.kind, mynode.rhs.lhs.val) )
-print( "rght rght kind={0} val={1}".format(mynode.rhs.rhs.kind, mynode.rhs.rhs.val) )
+print( "#root kind={0} val={1}".format(mynode.kind, mynode.val) )
+#print( "#left kind={0} val={1}".format(mynode.lhs.kind, mynode.lhs.val) )
+#print( "#rght kind={0} val={1}".format(mynode.rhs.kind, mynode.rhs.val) )
+#print( "#left left kind={0} val={1}".format(mynode.lhs.lhs.kind, mynode.lhs.lhs.val) )
+#print( "#left rght kind={0} val={1}".format(mynode.lhs.rhs.kind, mynode.lhs.rhs.val) )
+#print( "#rght left kind={0} val={1}".format(mynode.rhs.lhs.kind, mynode.rhs.lhs.val) )
+#print( "#rght rght kind={0} val={1}".format(mynode.rhs.rhs.kind, mynode.rhs.rhs.val) )
 
-print(" ret")    
+###############################################
+print('.intel_syntax noprefix')
+print('.global main')
+print('main:')
+
+gen( mynode )
+
+print('\tpop rax')
+print("\tret")    
 
