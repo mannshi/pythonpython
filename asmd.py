@@ -6,18 +6,73 @@ class TokenKind(Enum):
     TK_NUM      =  2
     TK_EOF      =  3
 
+tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')' ]
+
 class NodeKind(Enum):
     ND_ADD   = 1
-    ND_SUB   = 1
-    ND_MUL   = 1
-    ND_DIV   = 1
-    ND_NUM   = 1
+    ND_SUB   = 2
+    ND_MUL   = 3
+    ND_DIV   = 4
+    ND_NUM   = 5
 
 class Token:
     def __init__(self):
         self.kind = 0
         self.val = 0
         self.str = ''
+
+class Node:
+    def __init__(self):
+        self.kind = 0
+        self.lhs = 0
+        self.rhs = 0
+        self.val = 0
+
+def new_node( kind, lhs, rhs ):
+    newnode = Node()
+    newnode.kind = kind
+    newnode.lhs = lhs
+    newnode.rhs = rhs
+
+    return newnode
+
+def new_node_num( val ):
+    newnode = Node()
+    newnode.kind = NodeKind.ND_NUM
+    newnode.val  = val
+
+    return newnode
+
+def expr():
+    node = mul()
+
+    while True:
+        if consume( '+' ) :
+            node = new_node( NodeKind.ND_ADD, node, mul() )
+        elif consume( '-' ) :
+            node = new_node( NodeKind.ND_SUB, node, mul() )
+        else:
+            return node
+
+def mul():
+    node = primary()
+
+    while True:
+        print('#mul')
+        if consume( '*' ):
+            node = new_node( NodeKind.ND_MUL, node, primary() )
+        elif consume( '/' ):
+            node = new_node( NodeKind.ND_DIV, node, primary() )
+        else:
+            return node
+
+def primary():
+    if consume( '(' ):
+        node = expr()
+        expect( ')' );
+        return node
+
+    return new_node_num( expect_number() )
 
 #
 # トークナイザ  
@@ -41,7 +96,7 @@ def tokenize(fname):
 
             if ch == '\n' or ch == ' ':
                 continue
-            if ch == '+' or ch == '-' :
+            if ch in tk_reserved_list:
                 newtkn = Token()
                 newtkn.kind = TokenKind.TK_RESERVED
                 newtkn.str = ch
@@ -98,24 +153,22 @@ def expect_number():
     del tkn[0]
     return val
 
+###############################################
 tokenize(sys.argv[1])
 
-print('.intel_syntax noprefix')
-print('.global main')
-print('main:')
-    
-print(" mov rax, {0}".format(expect_number()) )
-
+print('#print tkn')
 for t in tkn:
     print("#'{0}' , '{1}', '{2}'".format(t.kind, t.val, t.str) )
 
-while tkn[0].kind != TokenKind.TK_EOF:
-    if consume( '+' ):
-        print(" add rax, {0}".format(expect_number()))
-        continue
-    if expect( '-' ):
-        print(" sub rax, {0}".format(expect_number()))
-        continue
-        
+mynode = expr()
+
+print( "root kind={0} val={1}".format(mynode.kind, mynode.val) )
+print( "left kind={0} val={1}".format(mynode.lhs.kind, mynode.lhs.val) )
+print( "rght kind={0} val={1}".format(mynode.rhs.kind, mynode.rhs.val) )
+print( "left left kind={0} val={1}".format(mynode.lhs.lhs.kind, mynode.lhs.lhs.val) )
+print( "left rght kind={0} val={1}".format(mynode.lhs.rhs.kind, mynode.lhs.rhs.val) )
+print( "rght left kind={0} val={1}".format(mynode.rhs.lhs.kind, mynode.rhs.lhs.val) )
+print( "rght rght kind={0} val={1}".format(mynode.rhs.rhs.kind, mynode.rhs.rhs.val) )
+
 print(" ret")    
 
