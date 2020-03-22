@@ -221,21 +221,129 @@ def new_node_num( val ):
 #
 # トークナイザ  
 #
-
-
 def tokenize(fname):
+
+    def tk_number():
+        nonlocal ch
+        nonlocal offset
+        # 数字の場合
+        if ch >= '0' and ch <= '9':
+            tmpnum = ''
+            # print('digit')
+            while ch >= '0' and ch <= '9':
+                tmpnum += ch
+                f.seek( offset )
+                chb = f.read(1)
+                ch = chb.decode('utf-8')
+                offset += 1
+
+            newtkn = Token()
+            newtkn.kind = TokenKind.TK_NUM
+            newtkn.val = int( tmpnum )
+            tkn.append( newtkn )
+
+            offset -= 1
+
+    def tk_alphabet():
+        nonlocal ch
+        nonlocal offset
+
+        print('alpha')
+        tmpstr = ''
+        while ch.isalpha():
+            tmpstr += ch
+            f.seek( offset )
+            chb = f.read(1)
+            ch = chb.decode('utf-8')
+            offset +=1
+
+        print('tmpstr={0}'.format( tmpstr ) )
+        newtkn = Token()
+        newtkn.kind = TokenKind.TK_IDENT
+        newtkn.str = tmpstr
+        tkn.append( newtkn )
+
+        offset -= 1
+
+    def tk_bikkuri():
+        nonlocal ch
+        nonlocal offset
+        f.seek( offset )
+        offset += 1
+        chb = f.read(1)
+        ch  = chb.decode('utf-8')
+
+        if ch == '=' : # '!=' の場合
+            newtkn = Token()
+            newtkn.str = '!='
+            newtkn.kind = TokenKind.TK_RESERVED
+            tkn.append( newtkn )
+        else:
+            offset -= 1
+
+    def tk_less():
+        nonlocal ch
+        nonlocal offset
+
+        f.seek( offset )
+        offset += 1
+        chb = f.read(1)
+        ch  = chb.decode('utf-8')
+
+        newtkn = Token()
+        if ch == '=' : #'<=' の場合
+            newtkn.str = '<='
+        else: #'<' の場合
+            newtkn.str = '<'
+            offset -= 1
+        newtkn.kind = TokenKind.TK_RESERVED
+        tkn.append( newtkn )
+
+    def tk_equal():
+        nonlocal ch
+        nonlocal offset
+
+        f.seek( offset )
+        offset += 1
+        chb = f.read(1)
+        ch  = chb.decode('utf-8')
+
+        newtkn = Token()
+        if ch == '=' : #'==' の場合
+            newtkn.str = '=='
+        else: #'=' の場合
+            newtkn.str = '='
+            offset -= 1
+        newtkn.kind = TokenKind.TK_RESERVED
+        tkn.append( newtkn )
+
+    def tk_great():
+        nonlocal ch
+        nonlocal offset
+        f.seek( offset )
+        offset += 1
+        chb = f.read(1)
+        ch  = chb.decode('utf-8')
+
+        newtkn = Token()
+        if ch == '=' : #'>=' の場合
+            newtkn.str = '>='
+        else: #'>' の場合
+            newtkn.str = '>'
+            offset -= 1
+        newtkn.kind = TokenKind.TK_RESERVED
+        tkn.append( newtkn )
+
     with open(fname, 'rb') as f:
 
         offset = 0
         while True:
             f.seek( offset )
-            # print("offset='{0}'".format(offset))
             chb = f.read(1)
             ch = chb.decode('utf-8')
             offset += 1
             if ch == '' :
                 break
-            # print("readch='{0}'".format(ch) )
 
             if ch == '\n' or ch == ' ':
                 continue
@@ -250,110 +358,31 @@ def tokenize(fname):
 
             # '=' または '==' の場合
             if ch == '=':
-                f.seek( offset )
-                offset += 1
-                chb = f.read(1)
-                ch  = chb.decode('utf-8')
-
-                newtkn = Token()
-                if ch == '=' : #'==' の場合
-                    newtkn.str = '=='
-                else: #'=' の場合
-                    newtkn.str = '='
-                    offset -= 1
-                newtkn.kind = TokenKind.TK_RESERVED
-                tkn.append( newtkn )
+                tk_equal()
                 continue
 
             # '<' または '<=' の場合
             if ch == '<':
-                f.seek( offset )
-                offset += 1
-                chb = f.read(1)
-                ch  = chb.decode('utf-8')
-
-                newtkn = Token()
-                if ch == '=' : #'<=' の場合
-                    newtkn.str = '<='
-                else: #'<' の場合
-                    newtkn.str = '<'
-                    offset -= 1
-                newtkn.kind = TokenKind.TK_RESERVED
-                tkn.append( newtkn )
+                tk_less()
                 continue
 
             # '>' または '>=' の場合
             if ch == '>':
-                f.seek( offset )
-                offset += 1
-                chb = f.read(1)
-                ch  = chb.decode('utf-8')
-
-                newtkn = Token()
-                if ch == '=' : #'>=' の場合
-                    newtkn.str = '>='
-                else: #'>' の場合
-                    newtkn.str = '>'
-                    offset -= 1
-                newtkn.kind = TokenKind.TK_RESERVED
-                tkn.append( newtkn )
+                tk_great()
                 continue
 
             # '!' の場合
             if ch == '!':
-                f.seek( offset )
-                offset += 1
-                chb = f.read(1)
-                ch  = chb.decode('utf-8')
-
-                if ch == '=' : # '!=' の場合
-                    newtkn = Token()
-                    newtkn.str = '!='
-                    newtkn.kind = TokenKind.TK_RESERVED
-                    tkn.append( newtkn )
-                else:
-                    offset -= 1
+                tk_bikkuri()
                 continue
 
             # 変数の場合
             if ch.isalpha():
-                print('alpha')
-                tmpstr = ''
-                while ch.isalpha():
-                    tmpstr += ch
-                    f.seek( offset )
-                    chb = f.read(1)
-                    ch = chb.decode('utf-8')
-                    offset +=1
-
-                print('tmpstr={0}'.format( tmpstr ) )
-                newtkn = Token()
-                newtkn.kind = TokenKind.TK_IDENT
-                newtkn.str = tmpstr
-                tkn.append( newtkn )
-
-                offset -= 1
+                tk_alphabet()
                 continue
-                    
+
             # 数字の場合    
-            if ch >= '0' and ch <= '9':
-                tmpnum = ''
-                # print('digit')
-                while ch >= '0' and ch <= '9':
-                    tmpnum += ch
-                    f.seek( offset )
-                    chb = f.read(1)
-                    ch = chb.decode('utf-8')
-                    offset += 1
-
-                newtkn = Token()
-                newtkn.kind = TokenKind.TK_NUM
-                newtkn.val = int( tmpnum )
-                tkn.append( newtkn )
-
-                offset -= 1
-                    
-                # print("number='{0}'".format(tmpnum) )
+            tk_number()
 
     newtkn = Token()
     newtkn.kind = TokenKind.TK_EOF
