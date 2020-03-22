@@ -9,7 +9,7 @@ class TokenKind(Enum):
     TK_EOF      =  auto()
 
 tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')',
-                     '==', '!=', '>', '>=', '<',
+                     '==', '!=', '>', '>=', '<', '<=',
                      '=',
                      ';'
                    ]
@@ -24,7 +24,10 @@ class NodeKind(Enum):
     ND_MUL   = auto()
     ND_DIV   = auto()
     ND_NUM   = auto()
-    ND_ASSIGN = auto()
+    ND_EQU   = auto()  # '=='
+    ND_LT    = auto()  # '<'
+    ND_LTE   = auto()  # '<='
+    ND_ASSIGN = auto() # '='
     ND_LVAR = auto()
 
 class Token:
@@ -85,7 +88,7 @@ def assign():
     print("# assign")
     node = equality()
     if consume( '=' ):
-        node = new_node( ND_ASSIGN, node, assign() )
+        node = new_node( NodeKind.ND_ASSIGN, node, assign() )
     return node
         
 #
@@ -111,10 +114,18 @@ def relational():
     print("# relational")
     node = add()
     print("# RELATIONAL")
-    #while True:
+    while True:
         #if consume( '<' ) or consume( '<=' ) or consume( '>' ) or consume( '>=' ) :
-            #add()
-    return node
+        if consume( '<' ):
+            node = new_node( NodeKind.ND_LT, node, add() )
+        elif consume( '<=' ):
+            node = new_node( NodeKind.ND_LTE, node, add() )
+        elif consume( '>' ):
+            node = new_node( NodeKind.ND_LT, add(), node )
+        elif consume( '>=' ):
+            node = new_node( NodeKind.ND_LTE, add(), node )
+        else:
+            return node
 
 #
 # add = mul ("+" mul | "-" mul)*
@@ -228,12 +239,80 @@ def tokenize(fname):
 
             if ch == '\n' or ch == ' ':
                 continue
-            if ch in tk_reserved_list:
+
+            # 一文字のトークン の場合
+            if ch == ';' or ch == '+' or ch == '-' or ch == '*' or ch == '/' or ch == '(' or ch == ')' :
                 newtkn = Token()
                 newtkn.kind = TokenKind.TK_RESERVED
                 newtkn.str = ch
-                
                 tkn.append( newtkn )
+                continue
+
+            # '=' または '==' の場合
+            if ch == '=':
+                f.seek( offset )
+                offset += 1
+                chb = f.read(1)
+                ch  = chb.decode('utf-8')
+
+                newtkn = Token()
+                if ch == '=' : #'==' の場合
+                    newtkn.str = '=='
+                else: #'=' の場合
+                    newtkn.str = '='
+                    offset -= 1
+                newtkn.kind = TokenKind.TK_RESERVED
+                tkn.append( newtkn )
+                continue
+
+            # '<' または '<=' の場合
+            if ch == '<':
+                f.seek( offset )
+                offset += 1
+                chb = f.read(1)
+                ch  = chb.decode('utf-8')
+
+                newtkn = Token()
+                if ch == '=' : #'<=' の場合
+                    newtkn.str = '<='
+                else: #'<' の場合
+                    newtkn.str = '<'
+                    offset -= 1
+                newtkn.kind = TokenKind.TK_RESERVED
+                tkn.append( newtkn )
+                continue
+
+            # '>' または '>=' の場合
+            if ch == '>':
+                f.seek( offset )
+                offset += 1
+                chb = f.read(1)
+                ch  = chb.decode('utf-8')
+
+                newtkn = Token()
+                if ch == '=' : #'>=' の場合
+                    newtkn.str = '>='
+                else: #'>' の場合
+                    newtkn.str = '>'
+                    offset -= 1
+                newtkn.kind = TokenKind.TK_RESERVED
+                tkn.append( newtkn )
+                continue
+
+            # '!' の場合
+            if ch == '!':
+                f.seek( offset )
+                offset += 1
+                chb = f.read(1)
+                ch  = chb.decode('utf-8')
+
+                if ch == '=' : # '!=' の場合
+                    newtkn = Token()
+                    newtkn.str = '!='
+                    newtkn.kind = TokenKind.TK_RESERVED
+                    tkn.append( newtkn )
+                else:
+                    offset -= 1
                 continue
 
             # 変数の場合
@@ -340,6 +419,7 @@ def expect_number():
     return val
 
 ###############################################
+###############################################
 print('# tokenize start')
 tokenize(sys.argv[1])
 print('# tokenize end')
@@ -349,13 +429,10 @@ for t in tkn:
     print("#'{0}' , '{1}', '{2}'".format(t.kind, t.val, t.str) )
 print('#print tkn end')
 
-###############################################
-
 print('# parse start')
 program()
 print('# parse end')
 
-###############################################
 print('.intel_syntax noprefix')
 print('.global main')
 print('main:')
@@ -370,7 +447,7 @@ for nd in code:
     #print( "#rght rght kind={0} val={1}".format(nd.rhs.rhs.kind, nd.rhs.rhs.val) )
 
     gen( nd )
+    print('\tpop rax')
 
-print('\tpop rax')
 print("\tret")    
 
