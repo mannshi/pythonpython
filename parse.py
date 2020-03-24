@@ -134,8 +134,20 @@ def primary():
 
     if asmd.tkn[0].kind == asmd.TokenKind.TK_IDENT :
         newnode = asmd.Node()
-        newnode.kind = asmd.NodeKind.ND_NUM
+        newnode.kind = asmd.NodeKind.ND_LVAR
         newnode.str = asmd.tkn[0].str
+        if asmd.tkn[0].str in asmd.lvars :
+            pass
+        else :
+            asmd.lvars[ asmd.tkn[0].str ] = asmd.offset + 8
+        newnode.offset = asmd.lvars[ asmd.tkn[0].str ]
+        asmd.offset += 8
+        print('### newnode.kind {0}', newnode.kind )
+        print('### newnode.str {0}', newnode.str )
+        print('### newnode.offset {0}', newnode.offset )
+            
+        del asmd.tkn[0]
+
         return newnode
 
     if consume( '(' ):

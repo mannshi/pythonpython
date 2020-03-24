@@ -16,7 +16,8 @@ tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')',
 
 tkn = []
 code = []
-LVar = [] # リストよりも連想配列のほうがよさそう
+lvars = {}
+offset = 0
 
 class NodeKind(Enum):
     ND_ADD   = auto()

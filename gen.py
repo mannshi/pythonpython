@@ -6,8 +6,16 @@ def gen( node ):
     
     # NodeKindが、数値の場合
     # スタックにその値をプッシュする
+
+ #   print('#gen node.kind {0}', node.kind)
+    print(  "#  ##root kind={0} val={1} str={2} offset={3}".format(node.kind, node.val, node.str, node.offset) )
+
     if node.kind == asmd.NodeKind.ND_NUM :
         print( '\tpush {0}'.format( node.val ) )
+        return
+
+    if node.kind == asmd.NodeKind.ND_LVAR :
+        print('#IDENT GEN')
         return
 
     # NodeKindが、二項演算子の場合
@@ -38,6 +46,14 @@ def gen( node ):
     elif node.kind == asmd.NodeKind.ND_NEQ :
         print('\tcmp rax, rdi')
         print('\tsetne al')
+        print('\tmovzb rax, al')
+    elif node.kind == asmd.NodeKind.ND_LT :
+        print('\tcmp rax, rdi')
+        print('\tsetl al')
+        print('\tmovzb rax, al')
+    elif node.kind == asmd.NodeKind.ND_LTE :
+        print('\tcmp rax, rdi')
+        print('\tsetle al')
         print('\tmovzb rax, al')
 
     print('\tpush rax')
