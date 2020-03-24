@@ -1,3 +1,4 @@
+import sys
 import asmd
 
 #
@@ -46,8 +47,10 @@ def equality():
     print("# EQUALITY")
 
     while True:
-        if consume( '==' ) or consume( '!=' ) :
-            node = relational()
+        if consume( '==' ) :
+            node = new_node( asmd.NodeKind.ND_EQU, node, relational() )
+        if consume( '!=' ) :
+            node = new_node( asmd.NodeKind.ND_NEQ, node, relational() )
         break
 
     return node

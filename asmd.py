@@ -25,6 +25,7 @@ class NodeKind(Enum):
     ND_DIV   = auto()
     ND_NUM   = auto()
     ND_EQU   = auto()  # '=='
+    ND_NEQ   = auto()  # '!='
     ND_LT    = auto()  # '<'
     ND_LTE   = auto()  # '<='
     ND_ASSIGN = auto() # '='
