@@ -133,6 +133,7 @@ def primary():
         return new_node_num( expect_number() )
 
     if asmd.tkn[0].kind == asmd.TokenKind.TK_IDENT :
+        print('######TK_IDENT')
         newnode = asmd.Node()
         newnode.kind = asmd.NodeKind.ND_LVAR
         newnode.str = asmd.tkn[0].str

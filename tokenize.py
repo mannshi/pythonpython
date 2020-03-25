@@ -34,7 +34,6 @@ def tokenize(fname):
         nonlocal ch
         nonlocal offset
 
-        print('alpha')
         tmpstr = ''
         while ch.isalpha():
             tmpstr += ch
@@ -43,7 +42,6 @@ def tokenize(fname):
             ch = chb.decode('utf-8')
             offset +=1
 
-        print('tmpstr={0}'.format( tmpstr ) )
         newtkn = asmd.Token()
         newtkn.kind = asmd.TokenKind.TK_IDENT
         newtkn.str = tmpstr
