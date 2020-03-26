@@ -7,6 +7,7 @@ class TokenKind(Enum):
     TK_IDENT    =  auto()
     TK_NUM      =  auto()
     TK_EOF      =  auto()
+    TK_RETURN   =  auto()
 
 tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')',
                      '==', '!=', '>', '>=', '<', '<=',
@@ -31,6 +32,7 @@ class NodeKind(Enum):
     ND_LTE   = auto()  # '<='
     ND_ASSIGN = auto() # '='
     ND_LVAR = auto()
+    ND_RETURN = auto()
 
 class Token:
     def __init__(self):

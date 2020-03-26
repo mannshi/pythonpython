@@ -17,9 +17,25 @@ def program():
 #
 def stmt():
     print("# stmt")
-    node = expr()
-    expect(';')
-    return node
+    if consume( asmd.TokenKind.TK_RETURN ) :
+        print('#return')
+        node = asmd.Node()
+        node.kind = asmd.NodeKind.ND_RETURN
+        print('#1')
+        node.lhs = expr()
+        print('#2')
+    else :
+        print('#3')
+        node = expr()
+        print('#4')
+
+    print('##consume ;')
+    if consume( ';' ):
+        print('#consume ;')
+        return node
+    else:
+        print(';ではないトークンです')
+        sys.exit()
 
 #
 # expr = assign
@@ -130,6 +146,7 @@ def unary():
 def primary():
     print('# primary()')
     if asmd.tkn[0].kind == asmd.TokenKind.TK_NUM :
+        print('#TK_NUMMMM')
         return new_node_num( expect_number() )
 
     if asmd.tkn[0].kind == asmd.TokenKind.TK_IDENT :
@@ -173,6 +190,7 @@ def new_node( kind, lhs, rhs ):
     return newnode
 
 def new_node_num( val ):
+    print('#newnode num {0}'.format(val))
     newnode = asmd.Node()
     newnode.kind = asmd.NodeKind.ND_NUM
     newnode.val = val
@@ -180,10 +198,21 @@ def new_node_num( val ):
     return newnode
 
 def consume(op):
-    if asmd.tkn[0].kind != asmd.TokenKind.TK_RESERVED or asmd.tkn[0].str != op :
+    print('# consume tknknd {0}'.format(asmd.tkn[0].kind ))
+    if op == asmd.TokenKind.TK_RETURN :
+        if asmd.tkn[0].kind == asmd.TokenKind.TK_RETURN:
+            del asmd.tkn[0]
+        else :
+            return False
+            
+        
+    if asmd.tkn[0].kind != asmd.TokenKind.TK_RESERVED or asmd.tkn[0].str != op:
         return False
+
     del asmd.tkn[0]
+
     return True
+
 
 
 def expect( op ):
@@ -195,6 +224,7 @@ def expect( op ):
     return True
 
 def expect_number():
+    print('# expect_number  tknknd {0}'.format(asmd.tkn[0].kind ))
     if asmd.tkn[0].kind != asmd.TokenKind.TK_NUM:
         print("数ではありません")
         sys.exit()

@@ -1,13 +1,10 @@
 import asmd
+import sys
 #
 # コード生成
 #
 def gen( node ):
     
-
- #   print('#gen node.kind {0}', node.kind)
-    #print(  "#  ##root kind={0} val={1} str={2} offset={3}".format(node.kind, node.val, node.str, node.offset) )
-
     # NodeKindが、数値の場合
     # スタックにその値をプッシュする
     if node.kind == asmd.NodeKind.ND_NUM :
@@ -35,6 +32,15 @@ def gen( node ):
 
         return
 
+    # NodeKind が reurn の場合
+    if node.kind == asmd.NodeKind.ND_RETURN :
+        gen( node.lhs )
+        print('\tpop rax')
+        print('\tmov rsp, rbp')
+        print('\tpop rbp')
+        print('\tret')
+        return
+    
     # NodeKindが、二項演算子（四則演算、等号、不等号）の場合
     # lhs がスタックトップ
     # rhs がその次

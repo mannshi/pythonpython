@@ -43,7 +43,10 @@ def tokenize(fname):
             offset +=1
 
         newtkn = asmd.Token()
-        newtkn.kind = asmd.TokenKind.TK_IDENT
+        if tmpstr == 'return' :
+            newtkn.kind = asmd.TokenKind.TK_RETURN
+        else :
+            newtkn.kind = asmd.TokenKind.TK_IDENT
         newtkn.str = tmpstr
         asmd.tkn.append( newtkn )
 
