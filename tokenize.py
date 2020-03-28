@@ -1,4 +1,5 @@
 import asmd
+from asmd import TokenKind as TK
 
 #
 # トークナイザ  
@@ -24,7 +25,7 @@ def tokenize(fname):
                 offset += 1
 
             newtkn = asmd.Token()
-            newtkn.kind = asmd.TokenKind.TK_NUM
+            newtkn.kind = TK.TK_NUM
             newtkn.val = int( tmpnum )
             asmd.tkn.append( newtkn )
 
@@ -43,10 +44,14 @@ def tokenize(fname):
             offset +=1
 
         newtkn = asmd.Token()
-        if tmpstr == 'return' :
-            newtkn.kind = asmd.TokenKind.TK_RETURN
+        if tmpstr == 'if' :
+            newtkn.kind = TK.IF
+        elif tmpstr == 'else' :
+            newtkn.kind = TK.ELSE
+        elif tmpstr == 'return' :
+            newtkn.kind = TK.TK_RETURN
         else :
-            newtkn.kind = asmd.TokenKind.TK_IDENT
+            newtkn.kind = TK.TK_IDENT
         newtkn.str = tmpstr
         asmd.tkn.append( newtkn )
 
@@ -63,7 +68,7 @@ def tokenize(fname):
         if ch == '=' : # '!=' の場合
             newtkn = asmd.Token()
             newtkn.str = '!='
-            newtkn.kind = asmd.TokenKind.TK_RESERVED
+            newtkn.kind = TK.TK_RESERVED
             asmd.tkn.append( newtkn )
         else:
             offset -= 1
@@ -83,7 +88,7 @@ def tokenize(fname):
         else: #'<' の場合
             newtkn.str = '<'
             offset -= 1
-        newtkn.kind = asmd.TokenKind.TK_RESERVED
+        newtkn.kind = TK.TK_RESERVED
         asmd.tkn.append( newtkn )
 
     def tk_equal():
@@ -101,7 +106,7 @@ def tokenize(fname):
         else: #'=' の場合
             newtkn.str = '='
             offset -= 1
-        newtkn.kind = asmd.TokenKind.TK_RESERVED
+        newtkn.kind = TK.TK_RESERVED
         asmd.tkn.append( newtkn )
 
     def tk_great():
@@ -118,7 +123,7 @@ def tokenize(fname):
         else: #'>' の場合
             newtkn.str = '>'
             offset -= 1
-        newtkn.kind = asmd.TokenKind.TK_RESERVED
+        newtkn.kind = TK.TK_RESERVED
         asmd.tkn.append( newtkn )
 
     #
@@ -142,9 +147,9 @@ def tokenize(fname):
             if ch == '\n' or ch == ' ': continue
 
             # 一文字のトークン の場合
-            if ch == ';' or ch == '+' or ch == '-' or ch == '*' or ch == '/' or ch == '(' or ch == ')' :
+            if ch == ';' or ch == '+' or ch == '-' or ch == '*' or ch == '/' or ch == '(' or ch == ')' or ch == '{' or ch == '}':
                 newtkn = asmd.Token()
-                newtkn.kind = asmd.TokenKind.TK_RESERVED
+                newtkn.kind = TK.TK_RESERVED
                 newtkn.str = ch
                 asmd.tkn.append( newtkn )
                 continue
@@ -172,7 +177,7 @@ def tokenize(fname):
     #
 
     newtkn = asmd.Token()
-    newtkn.kind = asmd.TokenKind.TK_EOF
+    newtkn.kind = TK.TK_EOF
     asmd.tkn.append( newtkn )
 #
 # トークナイザ  完了

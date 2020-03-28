@@ -1,5 +1,7 @@
 import asmd
 import sys
+from asmd import NodeKind as NK
+
 #
 # コード生成
 #
@@ -7,12 +9,30 @@ def gen( node ):
     
     # NodeKindが、数値の場合
     # スタックにその値をプッシュする
-    if node.kind == asmd.NodeKind.ND_NUM :
+    if node.kind == NK.ND_NUM :
         print( '\tpush {0}'.format( node.val ) )
         return
 
+    if node.kind == NK.BLOCK:
+        for stmt in node.stmts:
+            gen( stmt )
+        return 
+
+    if node.kind == NK.IF :
+        print('#ifgen')
+        gen( node.expr )
+        print('\tpop rax')
+        print('\tcmp rax, 0')
+        print('\tje .ELSE')
+        print('#ture gen')
+        gen( node.truebl )
+        print('\t.ELSE:')
+        gen( node.elsebl )
+        
+        return
+
     # NodeKind が左辺値の場合
-    if node.kind == asmd.NodeKind.ND_LVAR :
+    if node.kind == NK.ND_LVAR :
         gen_lval( node )
         print('\tpop rax')
         print('\tmov rax, [rax]')
@@ -20,7 +40,7 @@ def gen( node ):
         return 
 
     # NodeKind が代入の場合
-    if node.kind == asmd.NodeKind.ND_ASSIGN :
+    if node.kind == NK.ND_ASSIGN :
 
         gen_lval( node.lhs )
         gen( node.rhs )
@@ -33,7 +53,7 @@ def gen( node ):
         return
 
     # NodeKind が reurn の場合
-    if node.kind == asmd.NodeKind.ND_RETURN :
+    if node.kind == NK.ND_RETURN :
         gen( node.lhs )
         print('\tpop rax')
         print('\tmov rsp, rbp')
@@ -53,28 +73,28 @@ def gen( node ):
     print('\tpop rdi')
     print('\tpop rax')
     
-    if node.kind == asmd.NodeKind.ND_ADD :
+    if node.kind == NK.ND_ADD :
         print('\tadd rax, rdi')
-    elif node.kind == asmd.NodeKind.ND_SUB :
+    elif node.kind == NK.ND_SUB :
         print('\tsub rax, rdi')
-    elif node.kind == asmd.NodeKind.ND_MUL :
+    elif node.kind == NK.ND_MUL :
         print('\timul rax, rdi')
-    elif node.kind == asmd.NodeKind.ND_DIV :
+    elif node.kind == NK.ND_DIV :
         print('\tcqo')
         print('\tidiv rax, rdi')
-    elif node.kind == asmd.NodeKind.ND_EQU :
+    elif node.kind == NK.ND_EQU :
         print('\tcmp rax, rdi')
         print('sete al')
         print('movzb rax, al')
-    elif node.kind == asmd.NodeKind.ND_NEQ :
+    elif node.kind == NK.ND_NEQ :
         print('\tcmp rax, rdi')
         print('\tsetne al')
         print('\tmovzb rax, al')
-    elif node.kind == asmd.NodeKind.ND_LT :
+    elif node.kind == NK.ND_LT :
         print('\tcmp rax, rdi')
         print('\tsetl al')
         print('\tmovzb rax, al')
-    elif node.kind == asmd.NodeKind.ND_LTE :
+    elif node.kind == NK.ND_LTE :
         print('\tcmp rax, rdi')
         print('\tsetle al')
         print('\tmovzb rax, al')
@@ -87,7 +107,7 @@ def gen( node ):
 #
 
 def gen_lval(node):
-    if node.kind != asmd.NodeKind.ND_LVAR:
+    if node.kind != NK.ND_LVAR:
         print('代入の左辺値が変数ではありません')
         sys.exit()
     

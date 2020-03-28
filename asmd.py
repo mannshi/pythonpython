@@ -8,6 +8,10 @@ class TokenKind(Enum):
     TK_NUM      =  auto()
     TK_EOF      =  auto()
     TK_RETURN   =  auto()
+    TK_WHILE    =  auto()
+    IF          =  auto()
+    ELSE        =  auto()
+    TK_FOR      =  auto()
 
 tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')',
                      '==', '!=', '>', '>=', '<', '<=',
@@ -33,6 +37,9 @@ class NodeKind(Enum):
     ND_ASSIGN = auto() # '='
     ND_LVAR = auto()
     ND_RETURN = auto()
+    IF = auto()
+    ELSE = auto()
+    BLOCK = auto()
 
 class Token:
     def __init__(self):
@@ -47,6 +54,19 @@ class Node:
         self.rhs = 0
         self.val = 0 # kindがND_NUMの場合のみ使う
         self.offset = 0 # kindがND_LVARの場合のみ使う
+
+class NodeIF:
+    def __init__(self):
+        self.kind = 0
+        self.expr = 0
+        self.truebl = 0
+        self.elsebl = 0
+
+class NodeBLOCK:
+    def __init__(self):
+        self.kind = 0
+        self.stmts = []
+
 
 # 辞書を使うなら必要ない？
 class cLVar:
