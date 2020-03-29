@@ -2,10 +2,12 @@ import asmd
 import sys
 from asmd import NodeKind as NK
 
+if_num = 0
 #
 # コード生成
 #
 def gen( node ):
+    global if_num
     
     # NodeKindが、数値の場合
     # スタックにその値をプッシュする
@@ -23,11 +25,20 @@ def gen( node ):
         gen( node.expr )
         print('\tpop rax')
         print('\tcmp rax, 0')
-        print('\tje .ELSE')
+        if_num_tmp1 = if_num
+        if_num += 1
+        if_num_tmp2 = if_num
+        if_num += 1
+        print('\tje .ELSE' + str(if_num_tmp1).zfill(3) )
         print('#ture gen')
-        gen( node.truebl )
-        print('\t.ELSE:')
-        gen( node.elsebl )
+        if not node.truebl == 0:
+            gen( node.truebl )
+        print('\tjmp .IFEND' + str(if_num_tmp2).zfill(3) )
+        print('\t.ELSE' + str(if_num_tmp1).zfill(3) + ':')
+        if not node.elsebl == 0:
+            gen( node.elsebl )
+        print('.IFEND' + str(if_num_tmp2).zfill(3) + ':' )
+        
         
         return
 
