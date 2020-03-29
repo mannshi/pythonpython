@@ -40,6 +40,7 @@ class NodeKind(Enum):
     IF = auto()
     ELSE = auto()
     BLOCK = auto()
+    FUNC = auto()
 
 class Token:
     def __init__(self):
@@ -66,6 +67,11 @@ class NodeBLOCK:
     def __init__(self):
         self.kind = 0
         self.stmts = []
+
+class NodeFUNC:
+    def __init__(self):
+        self.kind = 0
+        self.name = 0
 
 
 # 辞書を使うなら必要ない？

@@ -9,6 +9,14 @@ if_num = 0
 def gen( node ):
     global if_num
     
+    # NodeKind が FUNC　の場合
+    if node.kind == NK.FUNC :
+        print('#FUNC')
+        print('\tcall {0}'.format(node.name) )
+        print('\tpush rax')
+        
+        return
+        
     # NodeKindが、数値の場合
     # スタックにその値をプッシュする
     if node.kind == NK.ND_NUM :

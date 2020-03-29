@@ -189,32 +189,53 @@ def unary():
     return primary()
 
 #
-# primary = num | ident | "(" expr ")"
+# primary = num |
+#           ident |
+#           "(" expr ")"
 #
 def primary():
+    def primary_IDENT() :
+
+        print('######TK_IDENT')
+        newnode = asmd.Node()
+
+        if saki( '(', 1 ):
+            newnode.kind = ND.FUNC
+            newnode.name = asmd.tkn[0].str
+            del asmd.tkn[0]
+            del asmd.tkn[0]
+
+            # 関数呼び出しの場合
+            if not consume( ')' ) :
+                print('関数呼び出しが ) で閉じられていません' )
+                sys.exit()
+            return newnode
+
+        else :
+            # 変数（左辺値）の場合
+            newnode.kind = asmd.NodeKind.ND_LVAR
+            newnode.str = asmd.tkn[0].str
+            if asmd.tkn[0].str in asmd.lvars :
+                pass
+            else :
+                asmd.lvars[ asmd.tkn[0].str ] = asmd.offset + 8
+            newnode.offset = asmd.lvars[ asmd.tkn[0].str ]
+            asmd.offset += 8
+            print('### newnode.kind {0}', newnode.kind )
+            print('### newnode.str {0}', newnode.str )
+            print('### newnode.offset {0}', newnode.offset )
+            
+        del asmd.tkn[0]
+        return newnode
+
     print('# primary()')
     if asmd.tkn[0].kind == TK.TK_NUM :
         print('#TK_NUMMMM')
         return new_node_num( expect_number() )
 
     if asmd.tkn[0].kind == TK.TK_IDENT :
-        print('######TK_IDENT')
-        newnode = asmd.Node()
-        newnode.kind = asmd.NodeKind.ND_LVAR
-        newnode.str = asmd.tkn[0].str
-        if asmd.tkn[0].str in asmd.lvars :
-            pass
-        else :
-            asmd.lvars[ asmd.tkn[0].str ] = asmd.offset + 8
-        newnode.offset = asmd.lvars[ asmd.tkn[0].str ]
-        asmd.offset += 8
-        print('### newnode.kind {0}', newnode.kind )
-        print('### newnode.str {0}', newnode.str )
-        print('### newnode.offset {0}', newnode.offset )
-            
-        del asmd.tkn[0]
-
-        return newnode
+        print('#primary_IDENT')
+        return primary_IDENT()
 
     if consume( '(' ):
         node = expr()
@@ -255,7 +276,10 @@ def consume_tk(tk):
             print('#consume_tk false')
             return False
     
-def consume(op):
+# saki : 先読みフラグ
+# 0     の時は先読みしないトークンを消費する
+# 0以外 の時は先読みしてトークンを消費しない
+def consume(op ):
     print('# consume tknknd {0}'.format(asmd.tkn[0].kind ))
     if op == TK.TK_RETURN :
         if asmd.tkn[0].kind == TK.TK_RETURN:
@@ -272,12 +296,22 @@ def consume(op):
     return True
 
 
+def saki( op, saki ):
+    
+    saki_kind = asmd.tkn[saki].kind
+    saki_str  = asmd.tkn[saki].str
+    
+    if saki_kind != TK.TK_RESERVED or saki_str != op:
+        return False
+
+    return True
 
 def expect( op ):
     print(" # expect {0}".format( op ) )
     if asmd.tkn[0].kind != TK.TK_RESERVED or asmd.tkn[0].str != op:
         print( "'{0}'ではありません".format(op) )
         sys.exit()
+
     del asmd.tkn[0]
     return True
 
@@ -287,6 +321,9 @@ def expect_number():
         print("数ではありません")
         sys.exit()
 
+    print('# valval {0}'.format(asmd.tkn[0].val ) )
+
     val = asmd.tkn[0].val
     del asmd.tkn[0]
+
     return val
