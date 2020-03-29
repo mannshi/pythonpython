@@ -192,27 +192,38 @@ def unary():
 # primary = num |
 #           ident |
 #           "(" expr ")"
+#            ident "(" expr "," ")"
 #
 def primary():
     def primary_IDENT() :
 
         print('######TK_IDENT')
-        newnode = asmd.Node()
 
         if saki( '(', 1 ):
+            newnode = asmd.NodeFUNC()
             newnode.kind = ND.FUNC
             newnode.name = asmd.tkn[0].str
             del asmd.tkn[0]
             del asmd.tkn[0]
 
             # 関数呼び出しの場合
-            if not consume( ')' ) :
-                print('関数呼び出しが ) で閉じられていません' )
-                sys.exit()
+            if consume( ')' ):
+                return newnode
+            
+            while True :
+                para = expr();
+                newnode.para.append( para )
+
+                if consume( ')' ) :
+                    break
+                if not consume( ',' ):
+                    print('関数呼び出し方が不正です' )
+                    sys.exit()
             return newnode
 
         else :
             # 変数（左辺値）の場合
+            newnode = asmd.Node()
             newnode.kind = asmd.NodeKind.ND_LVAR
             newnode.str = asmd.tkn[0].str
             if asmd.tkn[0].str in asmd.lvars :

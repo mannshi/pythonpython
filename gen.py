@@ -12,6 +12,21 @@ def gen( node ):
     # NodeKind が FUNC　の場合
     if node.kind == NK.FUNC :
         print('#FUNC')
+        pcnt = 0
+        for para in node.para:
+            gen( para )
+            if pcnt == 0:
+                print("\tpop rdi\n");
+            elif pcnt == 1:
+                print("\tpop rsi\n");
+            elif pcnt == 2:
+                print("\tpop rdx\n");
+            elif pcnt == 3:
+                print("\tpop rcx\n");
+            else:
+                print('関数の引数は４つまで')
+                sys.exit()
+            pcnt += 1
         print('\tcall {0}'.format(node.name) )
         print('\tpush rax')
         

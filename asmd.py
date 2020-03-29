@@ -72,6 +72,7 @@ class NodeFUNC:
     def __init__(self):
         self.kind = 0
         self.name = 0
+        self.para = [] 
 
 
 # 辞書を使うなら必要ない？
