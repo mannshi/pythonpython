@@ -1,6 +1,6 @@
 import asmd
 import sys
-from asmd import NodeKind as NK
+from asmd import NodeKind as ND
 
 if_num = 0
 #
@@ -9,8 +9,37 @@ if_num = 0
 def gen( node ):
     global if_num
     
+    if node.kind == ND.FUNCDEF :
+        # 関数の名前＝ラベル
+        print("{0}:".format(node.name))
+
+        # プロローグ
+        print('\tpush rbp')
+        print('\tmov rbp, rsp')
+        print('\tsub rsp, 208')
+
+        # レジスタの中身をパラメータにコピーする
+        para_i = 1
+        para_reg = { "rdi", "rsi", "rdx", "rcx" };
+        while para_i < node.paranum :
+            print("\tmov rax, rbp\n");
+            print("\tsub rax, %d\n", node.lvars[param_i]);
+            print("\tmov [rax], %s\n", node.lvars[param_i] );
+            pra_n += 1
+            
+        # 関数本体（ブロック）を出力する
+        gen( node.block )
+
+        #エピローグ
+        #最後の式の結果がRAXに残っているのでそれが返り値になる
+        print('\tpop rax')
+        print('\tmov rsp, rbp')
+        print('\tpop rbp')
+
+        return
+
     # NodeKind が FUNC　の場合
-    if node.kind == NK.FUNC :
+    if node.kind == ND.FUNC :
         print('#FUNC')
         pcnt = 0
         for para in node.para:
@@ -24,8 +53,8 @@ def gen( node ):
             elif pcnt == 3:
                 print("\tpop rcx\n");
             else:
-                print('関数の引数は４つまで')
-                sys.exit()
+                raise asmd.ManncError('関数の引数は４つまで')
+                #sys.exit()
             pcnt += 1
         print('\tcall {0}'.format(node.name) )
         print('\tpush rax')
@@ -34,16 +63,16 @@ def gen( node ):
         
     # NodeKindが、数値の場合
     # スタックにその値をプッシュする
-    if node.kind == NK.ND_NUM :
+    if node.kind == ND.ND_NUM :
         print( '\tpush {0}'.format( node.val ) )
         return
 
-    if node.kind == NK.BLOCK:
+    if node.kind == ND.BLOCK:
         for stmt in node.stmts:
             gen( stmt )
         return 
 
-    if node.kind == NK.IF :
+    if node.kind == ND.IF :
         print('#ifgen')
         gen( node.expr )
         print('\tpop rax')
@@ -66,7 +95,7 @@ def gen( node ):
         return
 
     # NodeKind が左辺値の場合
-    if node.kind == NK.ND_LVAR :
+    if node.kind == ND.ND_LVAR :
         gen_lval( node )
         print('\tpop rax')
         print('\tmov rax, [rax]')
@@ -74,7 +103,7 @@ def gen( node ):
         return 
 
     # NodeKind が代入の場合
-    if node.kind == NK.ND_ASSIGN :
+    if node.kind == ND.ND_ASSIGN :
 
         gen_lval( node.lhs )
         gen( node.rhs )
@@ -87,7 +116,7 @@ def gen( node ):
         return
 
     # NodeKind が reurn の場合
-    if node.kind == NK.ND_RETURN :
+    if node.kind == ND.ND_RETURN :
         gen( node.lhs )
         print('\tpop rax')
         print('\tmov rsp, rbp')
@@ -107,28 +136,28 @@ def gen( node ):
     print('\tpop rdi')
     print('\tpop rax')
     
-    if node.kind == NK.ND_ADD :
+    if node.kind == ND.ND_ADD :
         print('\tadd rax, rdi')
-    elif node.kind == NK.ND_SUB :
+    elif node.kind == ND.ND_SUB :
         print('\tsub rax, rdi')
-    elif node.kind == NK.ND_MUL :
+    elif node.kind == ND.ND_MUL :
         print('\timul rax, rdi')
-    elif node.kind == NK.ND_DIV :
+    elif node.kind == ND.ND_DIV :
         print('\tcqo')
         print('\tidiv rax, rdi')
-    elif node.kind == NK.ND_EQU :
+    elif node.kind == ND.ND_EQU :
         print('\tcmp rax, rdi')
         print('sete al')
         print('movzb rax, al')
-    elif node.kind == NK.ND_NEQ :
+    elif node.kind == ND.ND_NEQ :
         print('\tcmp rax, rdi')
         print('\tsetne al')
         print('\tmovzb rax, al')
-    elif node.kind == NK.ND_LT :
+    elif node.kind == ND.ND_LT :
         print('\tcmp rax, rdi')
         print('\tsetl al')
         print('\tmovzb rax, al')
-    elif node.kind == NK.ND_LTE :
+    elif node.kind == ND.ND_LTE :
         print('\tcmp rax, rdi')
         print('\tsetle al')
         print('\tmovzb rax, al')
@@ -141,9 +170,9 @@ def gen( node ):
 #
 
 def gen_lval(node):
-    if node.kind != NK.ND_LVAR:
-        print('代入の左辺値が変数ではありません')
-        sys.exit()
+    if node.kind != ND.ND_LVAR:
+        raise asmd.ManncError('代入の左辺値が変数ではありません')
+        #sys.exit()
     
     print('\tmov rax, rbp')
     print('\tsub rax, {0}'.format(node.offset))

@@ -4,7 +4,7 @@ from asmd import TokenKind as TK
 #
 # トークナイザ  
 #
-def tokenize(fname):
+def mytokenize(fname):
 
     #
     # 関数内関数

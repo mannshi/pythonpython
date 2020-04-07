@@ -9,11 +9,81 @@ from asmd import NodeKind as ND
 #
 
 #
+# program = funcdef*
+#
+def program() :
+    while asmd.tkn[0].kind != TK.TK_EOF:
+        asmd.code.append( funcdef() )
+
+#
+# funcdef = ( idnet '(' ')' |
+#            ident '(' ( "," ident )* ')'  ) "{" stmt* "}"
+#
+def funcdef():
+
+    if asmd.tkn[0].kind != TK.TK_IDENT:
+        raise asmd.ManncError( '関数の定義ではありません' )
+        #print('関数の定義ではありません')
+        #sys.exit()
+
+    newnode = asmd.NodeFUNCDEF()
+    newnode.kind = ND.FUNCDEF
+    newnode.name = asmd.tkn[0].str
+    del asmd.tkn[0]
+
+#
+# ここでグローバル変数の lvars を初期化する？
+# primary()の返り値を newnode と lvars にする？
+#
+    
+    if not consume( '(' ):
+        raise asmd.ManncError('関数パラメータの定義がおかしいです A')
+        #sys.exit()
+
+    while True :
+        if consume( ')' ):
+            # 引数のない関数
+            break;
+
+        if asmd.tkn[0].kind != TK.TK_IDENT:
+            raise asmd.ManncError('関数パラメータの定義がおかしいです B')
+            #sys.exit()
+
+        para = expr();
+        newnode.para.append( para )
+        newnode.paranum += 1
+
+        # ローカル変数用左辺値
+        if asmd.tkn[0].str in newnode.lvars :
+            pass
+        else :
+            newnode.lvars[ asmd.tkn[0].str ] = newnode.offset + 8
+        newnode.offset = newnode.lvars[ asmd.tkn[0].str ]
+        asmd.offset += 8
+
+        if consume( ')' ):
+            # 引数のない関数
+            break;
+        
+        if not consume( ',' ):
+            raise asmd.ManncError('関数パラメータの定義がおかしいです C')
+            sys.exit()
+        
+    # パラメータ読み込み終わり
+
+    # 関数の実行部分は BLOCK で書き換えられる？
+    # BLOCKにしないと、genする時にうまく生成できない？
+    llvars = newnode.lvars
+    newnode.block = stmt()
+
+    return newnode
+
+#
 # program = stmt*
 #
-def program():
-    while asmd.tkn[0].kind != TK.TK_EOF :
-        asmd.code.append( stmt() )
+#def program():
+#    while asmd.tkn[0].kind != TK.TK_EOF :
+#        asmd.code.append( stmt() )
 
 #
 # stmt = expr ";"
@@ -29,15 +99,15 @@ def stmt():
     def stmt_if():
         print('#IF')
         if not consume( '(' ) :
-            print('if の後は ( が必要です')
-            sys.exit()
+            raise asmd.ManncError('if の後は ( が必要です')
+            #sys.exit()
         node = asmd.NodeIF()
         node.kind = ND.IF
         node.expr = expr()
         if not consume( ')' ) :
             print('#IF 2')
-            print('if の ''('' 後は '')'' が必要です')
-            sys.exit()
+            raise asmd.ManncError('if の ''('' 後は '')'' が必要です')
+            #sys.exit()
         print('#IF 3')
         node.truebl = stmt()
         print('#IF 3.5')
@@ -82,8 +152,8 @@ def stmt():
         print('#consume ;')
         return node
     else:
-        print(';ではないトークンです')
-        sys.exit()
+        raise asmd.ManncError(';ではないトークンです')
+        #sys.exit()
 
 #
 # expr = assign
@@ -200,7 +270,7 @@ def primary():
         print('######TK_IDENT')
 
         if saki( '(', 1 ):
-            newnode = asmd.NodeFUNC()
+            newnode = asmd.NodeFUNCCALL()
             newnode.kind = ND.FUNC
             newnode.name = asmd.tkn[0].str
             del asmd.tkn[0]
@@ -217,8 +287,8 @@ def primary():
                 if consume( ')' ) :
                     break
                 if not consume( ',' ):
-                    print('関数呼び出し方が不正です' )
-                    sys.exit()
+                    raise asmd.ManncError('関数呼び出し方が不正です' )
+                    # sys.exit()
             return newnode
 
         else :
@@ -226,11 +296,11 @@ def primary():
             newnode = asmd.Node()
             newnode.kind = asmd.NodeKind.ND_LVAR
             newnode.str = asmd.tkn[0].str
-            if asmd.tkn[0].str in asmd.lvars :
+            if asmd.tkn[0].str in asmd.llvars :
                 pass
             else :
-                asmd.lvars[ asmd.tkn[0].str ] = asmd.offset + 8
-            newnode.offset = asmd.lvars[ asmd.tkn[0].str ]
+                asmd.llvars[ asmd.tkn[0].str ] = asmd.offset + 8
+            newnode.offset = asmd.llvars[ asmd.tkn[0].str ]
             asmd.offset += 8
             print('### newnode.kind {0}', newnode.kind )
             print('### newnode.str {0}', newnode.str )
@@ -320,8 +390,8 @@ def saki( op, saki ):
 def expect( op ):
     print(" # expect {0}".format( op ) )
     if asmd.tkn[0].kind != TK.TK_RESERVED or asmd.tkn[0].str != op:
-        print( "'{0}'ではありません".format(op) )
-        sys.exit()
+        raise asmd.ManncError( "'{0}'ではありません".format(op) )
+        #sys.exit()
 
     del asmd.tkn[0]
     return True
@@ -329,8 +399,8 @@ def expect( op ):
 def expect_number():
     print('# expect_number  tknknd {0}'.format(asmd.tkn[0].kind ))
     if asmd.tkn[0].kind != TK.TK_NUM:
-        print("数ではありません")
-        sys.exit()
+        raise asmd.ManncError("数ではありません")
+        #sys.exit()
 
     print('# valval {0}'.format(asmd.tkn[0].val ) )
 

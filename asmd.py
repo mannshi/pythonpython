@@ -21,8 +21,10 @@ tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')',
 
 tkn = []
 code = []
-lvars = {}
+glvars = {}  #グローバル変数用
+llvars = {}  #スコープ（関数）毎にこの変数に代入する
 offset = 0
+functions = []
 
 class NodeKind(Enum):
     ND_ADD   = auto()
@@ -41,6 +43,7 @@ class NodeKind(Enum):
     ELSE = auto()
     BLOCK = auto()
     FUNC = auto()
+    FUNCDEF = auto()
 
 class Token:
     def __init__(self):
@@ -68,12 +71,20 @@ class NodeBLOCK:
         self.kind = 0
         self.stmts = []
 
-class NodeFUNC:
+class NodeFUNCCALL:
     def __init__(self):
         self.kind = 0
         self.name = 0
         self.para = [] 
 
+class NodeFUNCDEF:
+    def __init__(self):
+        self.kind = 0
+        self.name = 0
+        self.lvars = {} # 変数名　と　offset
+        self.offset = 0
+        self.block = []  # 関数本体（ブロックといっしょ）
+        self.paranum = 0
 
 # 辞書を使うなら必要ない？
 class cLVar:
@@ -81,3 +92,4 @@ class cLVar:
         self.name = ''
         self.offset = 0
     
+class ManncError(Exception) : pass

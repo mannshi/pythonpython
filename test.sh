@@ -13,8 +13,5 @@ for n in {1..6};do
 	afile=testi$num.s
 	efile=testi$num.exe
 	
-	echo $ifile
-	echo $afile
-	echo $efile
-	echo TEST$num; ( /usr/bin/python3 mannc.py $ifile > $afile ); gcc -o $efile $afile ; ./$efile ;echo $?; echo expect ${answer[$n]}
+	echo TEST$num; ( /usr/bin/python3 mannc.py $ifile > $afile ); gcc -o $efile $afile ; ./$efile ;echo execute $?; echo expect ${answer[$n]}
 done
