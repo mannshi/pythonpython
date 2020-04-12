@@ -44,6 +44,8 @@ class NodeKind(Enum):
     BLOCK = auto()
     FUNC = auto()
     FUNCDEF = auto()
+    ADDR = auto()
+    DEREF = auto()
 
 class Token:
     def __init__(self):

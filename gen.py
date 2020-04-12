@@ -9,6 +9,17 @@ if_num = 0
 def gen( node ):
     global if_num
     
+    if node.kind == ND.ADDR :
+        gen_lval( node.lhs )
+        return
+    
+    if node.kind == ND.DEREF :
+        gen( node.lhs )
+        print('\tpop rax')
+        print('\tmov rax, [rax]')
+        print('\tpush rax')
+        return
+
     if node.kind == ND.FUNCDEF :
         # 関数の名前＝ラベル
         print("{0}:".format(node.name))

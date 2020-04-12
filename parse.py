@@ -262,6 +262,14 @@ def unary():
         node = new_node( asmd.NodeKind.ND_SUB, lnode, primary )
         return node
     
+    # アドレス（ポインタ）用演算子
+    if consume( '*' ):
+        node = new_node( ND.DEREF, unary(), 0 )
+        return node
+    if consume( '&' ):
+        node = new_node( ND.ADDR, unary(), 0 )
+        return node
+    
     return primary()
 
 #

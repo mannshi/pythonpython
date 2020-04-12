@@ -147,7 +147,7 @@ def mytokenize(fname):
             if ch == '\n' or ch == ' ': continue
 
             # 一文字のトークン の場合
-            if ch == ';' or ch == '+' or ch == '-' or ch == '*' or ch == '/' or ch == '(' or ch == ')' or ch == '{' or ch == '}' or ch ==',':
+            if ch == ';' or ch == '+' or ch == '-' or ch == '*' or ch == '/' or ch == '(' or ch == ')' or ch == '{' or ch == '}' or ch ==',' or ch == '&':
                 newtkn = asmd.Token()
                 newtkn.kind = TK.TK_RESERVED
                 newtkn.str = ch
