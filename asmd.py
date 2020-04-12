@@ -84,7 +84,9 @@ class NodeFUNCDEF:
         self.lvars = {} # 変数名　と　offset
         self.offset = 0
         self.block = []  # 関数本体（ブロックといっしょ）
+        self.para = [] # 引数の変数名を保存する lvars は辞書で実装しているため、順序をもてないので、別に用意する
         self.paranum = 0
+        self.param_offset = []
 
 # 辞書を使うなら必要ない？
 class cLVar:

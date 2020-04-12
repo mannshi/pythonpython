@@ -14,24 +14,30 @@ def gen( node ):
         print("{0}:".format(node.name))
 
         # プロローグ
+        print('#プロローグ')
         print('\tpush rbp')
         print('\tmov rbp, rsp')
-        print('\tsub rsp, 208')
+        print('\tsub rsp, {0}'.format(node.offset))
 
         # レジスタの中身をパラメータにコピーする
-        para_i = 1
-        para_reg = { "rdi", "rsi", "rdx", "rcx" };
+        para_i = 0
+        para_reg = [ "rdi", "rsi", "rdx", "rcx" ];
         while para_i < node.paranum :
+            print("#para{0}".format(para_i) )
+            print("#para{0}".format(node.para[para_i]) )
             print("\tmov rax, rbp\n");
-            print("\tsub rax, %d\n", node.lvars[param_i]);
-            print("\tmov [rax], %s\n", node.lvars[param_i] );
-            pra_n += 1
+            print("\tsub rax, {0}\n".format(node.lvars[node.para[para_i]]));
+            print("\tmov [rax], {0}\n".format(para_reg[para_i]));
+            para_i += 1
             
+        asmd.llvars = node.lvars.copy()
+
         # 関数本体（ブロック）を出力する
         gen( node.block )
 
         #エピローグ
         #最後の式の結果がRAXに残っているのでそれが返り値になる
+        print('#エピローグ')
         print('\tpop rax')
         print('\tmov rsp, rbp')
         print('\tpop rbp')
@@ -117,7 +123,9 @@ def gen( node ):
 
     # NodeKind が reurn の場合
     if node.kind == ND.ND_RETURN :
+        print('#NDRETUN')
         gen( node.lhs )
+        print('#NDRETURN エピローグ')
         print('\tpop rax')
         print('\tmov rsp, rbp')
         print('\tpop rbp')
@@ -174,6 +182,11 @@ def gen_lval(node):
         raise asmd.ManncError('代入の左辺値が変数ではありません')
         #sys.exit()
     
+    var = node.str
+    print('#here {0}'.format(var))
+    offset = asmd.llvars[var]
+    print('#gen_lval var={0} offset={1}'.format(var, offset ) )
+
     print('\tmov rax, rbp')
-    print('\tsub rax, {0}'.format(node.offset))
+    print('\tsub rax, {0}'.format(asmd.llvars[node.str]))
     print('\tpush rax')

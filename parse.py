@@ -35,6 +35,8 @@ def funcdef():
 # ここでグローバル変数の lvars を初期化する？
 # primary()の返り値を newnode と lvars にする？
 #
+    llvars = {}
+    offset = 0
     
     if not consume( '(' ):
         raise asmd.ManncError('関数パラメータの定義がおかしいです A')
@@ -49,17 +51,20 @@ def funcdef():
             raise asmd.ManncError('関数パラメータの定義がおかしいです B')
             #sys.exit()
 
-        para = expr();
-        newnode.para.append( para )
+        #para = expr();
+        #newnode.lvars.append( para )
         newnode.paranum += 1
 
-        # ローカル変数用左辺値
+        # 関数引数のローカル変数用左辺値
         if asmd.tkn[0].str in newnode.lvars :
+            # パラメータの変数名が重複する場合は考慮しない
             pass
         else :
             newnode.lvars[ asmd.tkn[0].str ] = newnode.offset + 8
-        newnode.offset = newnode.lvars[ asmd.tkn[0].str ]
-        asmd.offset += 8
+            newnode.para.append( asmd.tkn[0].str )
+            newnode.offset += 8
+
+        del asmd.tkn[0]
 
         if consume( ')' ):
             # 引数のない関数
@@ -73,8 +78,9 @@ def funcdef():
 
     # 関数の実行部分は BLOCK で書き換えられる？
     # BLOCKにしないと、genする時にうまく生成できない？
-    llvars = newnode.lvars
+    asmd.llvars = newnode.lvars.copy()
     newnode.block = stmt()
+    newnode.lvars = asmd.llvars.copy()
 
     return newnode
 
@@ -135,8 +141,8 @@ def stmt():
     if consume_tk( TK.IF ):
         return stmt_if()
         
-    if consume( TK.TK_RETURN ) :
-        print('#return')
+    if consume_tk( TK.TK_RETURN ) :
+        print('#returrrrrrn')
         node = asmd.Node()
         node.kind = asmd.NodeKind.ND_RETURN
         print('#1')
