@@ -50,6 +50,8 @@ def mytokenize(fname):
             newtkn.kind = TK.ELSE
         elif tmpstr == 'return' :
             newtkn.kind = TK.TK_RETURN
+        elif tmpstr == 'int' :
+            newtkn.kind = TK.INT
         else :
             newtkn.kind = TK.TK_IDENT
         newtkn.str = tmpstr

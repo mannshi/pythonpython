@@ -12,6 +12,7 @@ class TokenKind(Enum):
     IF          =  auto()
     ELSE        =  auto()
     TK_FOR      =  auto()
+    INT         =  auto()
 
 tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')',
                      '==', '!=', '>', '>=', '<', '<=',
@@ -78,6 +79,15 @@ class NodeFUNCCALL:
         self.kind = 0
         self.name = 0
         self.para = [] 
+
+class typ(Enum):
+    INT   = auto()
+    PTR   = auto()
+
+class myType:
+    def __init__(self):
+        self.ty = typ.INT;
+        self.ptr_to = 0;
 
 class NodeFUNCDEF:
     def __init__(self):

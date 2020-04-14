@@ -20,6 +20,9 @@ def program() :
 #            ident '(' ( "," ident )* ')'  ) "{" stmt* "}"
 #
 def funcdef():
+    if asmd.tkn[0].kind != TK.INT:
+        raise asmd.ManncError( '関数の定義が型名からはじまりません。' )
+    del asmd.tkn[0]
 
     if asmd.tkn[0].kind != TK.TK_IDENT:
         raise asmd.ManncError( '関数の定義ではありません' )
@@ -35,8 +38,8 @@ def funcdef():
 # ここでグローバル変数の lvars を初期化する？
 # primary()の返り値を newnode と lvars にする？
 #
-    llvars = {}
-    offset = 0
+    asmd.llvars = {}
+    asmd.offset = 0
     
     if not consume( '(' ):
         raise asmd.ManncError('関数パラメータの定義がおかしいです A')
@@ -46,6 +49,10 @@ def funcdef():
         if consume( ')' ):
             # 引数のない関数
             break;
+
+        if asmd.tkn[0].kind != TK.INT:
+            raise asmd.ManncError( '関数の引数が型名からはじまりません。' )
+        del asmd.tkn[0]
 
         if asmd.tkn[0].kind != TK.TK_IDENT:
             raise asmd.ManncError('関数パラメータの定義がおかしいです B')
