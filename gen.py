@@ -189,15 +189,20 @@ def gen( node ):
 #
 
 def gen_lval(node):
-    if node.kind != ND.ND_LVAR:
-        raise asmd.ManncError('代入の左辺値が変数ではありません')
-        #sys.exit()
-    
-    var = node.str
-    print('#here {0}'.format(var))
-    offset = asmd.llvars[var]
-    print('#gen_lval var={0} offset={1}'.format(var, offset ) )
+    if node.kind == ND.ND_LVAR:
+        var = node.str
+        print('#here {0}'.format(var))
+        offset = asmd.llvars[var]
+        print('#gen_lval var={0} offset={1}'.format(var, offset ) )
 
-    print('\tmov rax, rbp')
-    print('\tsub rax, {0}'.format(asmd.llvars[node.str]))
-    print('\tpush rax')
+        print('\tmov rax, rbp')
+        print('\tsub rax, {0}'.format(asmd.llvars[node.str]))
+        print('\tpush rax')
+
+        return 
+
+    if node.kind == ND.DEREF:
+        gen( node.lhs )
+        return 
+
+    raise asmd.ManncError('代入の左辺値が変数ではありません')

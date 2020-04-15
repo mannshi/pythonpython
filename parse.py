@@ -271,9 +271,11 @@ def unary():
     
     # アドレス（ポインタ）用演算子
     if consume( '*' ):
+        print('#ND.DEREF')
         node = new_node( ND.DEREF, unary(), 0 )
         return node
     if consume( '&' ):
+        print('#ND.ADDR')
         node = new_node( ND.ADDR, unary(), 0 )
         return node
     
