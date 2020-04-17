@@ -168,7 +168,7 @@ def stmt():
             #asmd.offset += 4
             asmd.offset += 8
             asmd.llvars[ asmd.tkn[0].str ] = asmd.offset
-            asmd.llvars_t[ asmd.tkn[0].str ] = thistype
+            asmd.llvars_t[ asmd.tkn[0].str ] = thistype.ty
             del asmd.tkn[0]
         else :
             # int型へのポインタの場合
@@ -178,8 +178,8 @@ def stmt():
             thistype = asmd.myType()
             thistype.ty = TYP.PTR
             thistype.ptr_to = asmd.myType()
-            thistype.ptr_to.ty = TYP.PTR
-            asmd.llvars_t[ asmd.tkn[0].str ] = thistype
+            thistype.ptr_to.ty = TYP.INT
+            asmd.llvars_t[ asmd.tkn[0].str ] = thistype.ty
             del asmd.tkn[0]
 
         if not consume( ';' ):
@@ -377,9 +377,10 @@ def primary():
             #newnode.offset = asmd.llvars[ asmd.tkn[0].str ]
             #asmd.offset += plusoffset
 
-            print('### newnode.kind {0}', newnode.kind )
-            print('### newnode.str {0}', newnode.str )
-            print('### newnode.offset {0}', newnode.offset )
+            print('### newnode.kind {0}'.format(newnode.kind ) )
+            print('### newnode.str {0}'.format(newnode.str ) )
+            print('### newnode.offset {0}'.format(newnode.offset ) )
+            print('### newnode.type {0}'.format(newnode.type ) )
             
         del asmd.tkn[0]
         return newnode

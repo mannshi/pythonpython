@@ -1,6 +1,7 @@
 import asmd
 import sys
 from asmd import NodeKind as ND
+from asmd import typ as TYP
 
 if_num = 0
 #
@@ -159,6 +160,14 @@ def gen( node ):
     print('\tpop rax')
     
     if node.kind == ND.ND_ADD :
+        #ポインタの計算をする場合
+
+        print('#add kind {0}'.format(node.lhs.kind))
+
+        if node.lhs.kind == ND.ND_LVAR:
+            print('#add type {0}'.format(node.lhs.type))
+            if node.lhs.type == TYP.PTR :
+                print('\timul rdi, 4')
         print('\tadd rax, rdi')
     elif node.kind == ND.ND_SUB :
         print('\tsub rax, rdi')
