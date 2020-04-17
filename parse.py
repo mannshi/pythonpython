@@ -2,6 +2,7 @@ import sys
 import asmd
 from asmd import TokenKind as TK
 from asmd import NodeKind as ND
+from asmd import typ as TYP
 
 
 #
@@ -20,16 +21,21 @@ def program() :
 #            ident '(' ( "," ident )* ')'  ) "{" stmt* "}"
 #
 def funcdef():
+    newnode = asmd.NodeFUNCDEF()
+
     if asmd.tkn[0].kind != TK.INT:
         raise asmd.ManncError( '関数の定義が型名からはじまりません。' )
     del asmd.tkn[0]
+
+    newnode.type = asmd.myType()
+    newnode.type = TYP.INT
+    print('#ftype {0}'.format( newnode.type ) )
 
     if asmd.tkn[0].kind != TK.TK_IDENT:
         raise asmd.ManncError( '関数の定義ではありません' )
         #print('関数の定義ではありません')
         #sys.exit()
 
-    newnode = asmd.NodeFUNCDEF()
     newnode.kind = ND.FUNCDEF
     newnode.name = asmd.tkn[0].str
     del asmd.tkn[0]
@@ -38,8 +44,6 @@ def funcdef():
 # ここでグローバル変数の lvars を初期化する？
 # primary()の返り値を newnode と lvars にする？
 #
-    asmd.llvars = {}
-    asmd.offset = 0
     
     if not consume( '(' ):
         raise asmd.ManncError('関数パラメータの定義がおかしいです A')
@@ -51,7 +55,7 @@ def funcdef():
             break;
 
         if asmd.tkn[0].kind != TK.INT:
-            raise asmd.ManncError( '関数の引数が型名からはじまりません。' )
+            raise asmd.ManncError( '関数の引数が型名からはじまりません。' + asmd.tkn[0].kind )
         del asmd.tkn[0]
 
         if asmd.tkn[0].kind != TK.TK_IDENT:
@@ -68,6 +72,7 @@ def funcdef():
             pass
         else :
             newnode.lvars[ asmd.tkn[0].str ] = newnode.offset + 8
+            newnode.lvars_t[ asmd.tkn[0].str ] = asmd.myType()
             newnode.para.append( asmd.tkn[0].str )
             newnode.offset += 8
 
@@ -86,8 +91,14 @@ def funcdef():
     # 関数の実行部分は BLOCK で書き換えられる？
     # BLOCKにしないと、genする時にうまく生成できない？
     asmd.llvars = newnode.lvars.copy()
+    asmd.llvars_t = newnode.lvars_t.copy()
+    asmd.offset = newnode.offset
+
     newnode.block = stmt()
+
     newnode.lvars = asmd.llvars.copy()
+    newnode.lvars_t = asmd.llvars_t.copy()
+    newnode.offset = asmd.offset
 
     return newnode
 
@@ -145,6 +156,38 @@ def stmt():
         
         return node
 
+    # 変数の宣言文の場合    
+    if consume_tk( TK.INT ):
+        if asmd.tkn[0].kind != TK.TK_IDENT and asmd.tkn[0].str != '*':
+            raise asmd.ManncError('型名の後ろが識別子 でも * でもありません')
+
+        if asmd.tkn[0].kind == TK.TK_IDENT :
+            # int型の場合
+            thistype = asmd.myType()
+            thistype.ty = TYP.INT
+            #asmd.offset += 4
+            asmd.offset += 8
+            asmd.llvars[ asmd.tkn[0].str ] = asmd.offset
+            asmd.llvars_t[ asmd.tkn[0].str ] = thistype
+            del asmd.tkn[0]
+        else :
+            # int型へのポインタの場合
+            del asmd.tkn[0]
+            asmd.offset += 8
+            asmd.llvars[ asmd.tkn[0].str ] = asmd.offset
+            thistype = asmd.myType()
+            thistype.ty = TYP.PTR
+            thistype.ptr_to = asmd.myType()
+            thistype.ptr_to.ty = TYP.PTR
+            asmd.llvars_t[ asmd.tkn[0].str ] = thistype
+            del asmd.tkn[0]
+
+        if not consume( ';' ):
+            raise asmd.ManncError(';ではないトークンです {0}'.format(asmd.tkn[0].str))
+
+        return 0
+        
+    # if文の場合
     if consume_tk( TK.IF ):
         return stmt_if()
         
@@ -165,7 +208,7 @@ def stmt():
         print('#consume ;')
         return node
     else:
-        raise asmd.ManncError(';ではないトークンです')
+        raise asmd.ManncError(';ではないトークンです{0}'.format(asmd.tkn[0].str))
         #sys.exit()
 
 #
@@ -316,15 +359,24 @@ def primary():
 
         else :
             # 変数（左辺値）の場合
+            if not asmd.tkn[0].str in asmd.llvars :
+                raise asmd.ManncError('宣言されていない変数を使用しようとしています<{0}><{1}>'.format(asmd.tkn[0].str, asmd.llvars ) )
+
             newnode = asmd.Node()
             newnode.kind = asmd.NodeKind.ND_LVAR
             newnode.str = asmd.tkn[0].str
-            if asmd.tkn[0].str in asmd.llvars :
-                pass
-            else :
-                asmd.llvars[ asmd.tkn[0].str ] = asmd.offset + 8
+
             newnode.offset = asmd.llvars[ asmd.tkn[0].str ]
-            asmd.offset += 8
+            newnode.type = asmd.llvars_t[ asmd.tkn[0].str ]
+
+            #if asmd.llvars_t[ asmd.tkn[0].str ].ty == TYP.INT :
+                #plusoffset = 4
+            #else :
+                #plusoffset = 8
+            #asmd.llvars[ asmd.tkn[0].str ] = asmd.offset + plusoffset
+            #newnode.offset = asmd.llvars[ asmd.tkn[0].str ]
+            #asmd.offset += plusoffset
+
             print('### newnode.kind {0}', newnode.kind )
             print('### newnode.str {0}', newnode.str )
             print('### newnode.offset {0}', newnode.offset )

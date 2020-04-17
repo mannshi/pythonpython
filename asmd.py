@@ -24,6 +24,7 @@ tkn = []
 code = []
 glvars = {}  #グローバル変数用
 llvars = {}  #スコープ（関数）毎にこの変数に代入する
+llvars_t = {} 
 offset = 0
 functions = []
 
@@ -61,6 +62,7 @@ class Node:
         self.rhs = 0
         self.val = 0 # kindがND_NUMの場合のみ使う
         self.offset = 0 # kindがND_LVARの場合のみ使う
+        self.type = 0
 
 class NodeIF:
     def __init__(self):
@@ -93,7 +95,9 @@ class NodeFUNCDEF:
     def __init__(self):
         self.kind = 0
         self.name = 0
+        self.type = 0
         self.lvars = {} # 変数名　と　offset
+        self.lvars_t = {} # 変数名　と　型
         self.offset = 0
         self.block = []  # 関数本体（ブロックといっしょ）
         self.para = [] # 引数の変数名を保存する lvars は辞書で実装しているため、順序をもてないので、別に用意する

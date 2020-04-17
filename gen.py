@@ -9,6 +9,9 @@ if_num = 0
 def gen( node ):
     global if_num
     
+    if node == 0:
+        return
+
     if node.kind == ND.ADDR :
         gen_lval( node.lhs )
         return
