@@ -13,6 +13,7 @@ class TokenKind(Enum):
     ELSE        =  auto()
     TK_FOR      =  auto()
     INT         =  auto()
+    SIZEOF      =  auto()
 
 tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')',
                      '==', '!=', '>', '>=', '<', '<=',

@@ -302,6 +302,15 @@ def mul():
 #
 def unary():
     print("# unary")
+
+    #sizeof
+    if consume_tk( TK.SIZEOF ):
+        node = unary()
+        if node.type == TYP.INT:
+            return new_node_num( 8 )
+        else :
+            return new_node_num( 8 )
+
     if consume( '+' ):
         lnode = new_node_num( 0 )
         node = new_node( asmd.NodeKind.ND_ADD, lnode, primary )
