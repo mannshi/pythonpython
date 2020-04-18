@@ -162,14 +162,39 @@ def stmt():
             raise asmd.ManncError('型名の後ろが識別子 でも * でもありません')
 
         if asmd.tkn[0].kind == TK.TK_IDENT :
-            # int型の場合
-            thistype = asmd.myType()
-            thistype.ty = TYP.INT
-            #asmd.offset += 4
-            asmd.offset += 8
-            asmd.llvars[ asmd.tkn[0].str ] = asmd.offset
-            asmd.llvars_t[ asmd.tkn[0].str ] = thistype.ty
-            del asmd.tkn[0]
+            if asmd.tkn[1].str == '[' :
+                #配列の場合
+                print('#配列の場合')
+                thistype = asmd.myType()
+                thistype.ty = TYP.ARRAY
+
+                if asmd.tkn[2].kind != TK.TK_NUM:
+                    raise asmd.ManncError('配列の添え字が数字ではありません')
+
+                thistype.array_size = asmd.tkn[2].val
+                print('#配列の場合 {0}'.format(thistype.array_size))
+                asmd.offset += 8 * asmd.tkn[2].val
+                asmd.llvars[ asmd.tkn[0].str ] = asmd.offset
+                asmd.llvars_t[ asmd.tkn[0].str ] = thistype.ty
+
+                if asmd.tkn[3].str != ']' :
+                    raise asmd.ManncError('配列が ] で閉じられていません')
+
+                del asmd.tkn[0]
+                del asmd.tkn[0]
+                del asmd.tkn[0]
+                del asmd.tkn[0]
+                
+            else :
+                # 配列ではない変数の場合
+                # int型の場合
+                thistype = asmd.myType()
+                thistype.ty = TYP.INT
+                #asmd.offset += 4
+                asmd.offset += 8
+                asmd.llvars[ asmd.tkn[0].str ] = asmd.offset
+                asmd.llvars_t[ asmd.tkn[0].str ] = thistype.ty
+                del asmd.tkn[0]
         else :
             # int型へのポインタの場合
             del asmd.tkn[0]
@@ -321,6 +346,18 @@ def unary():
         node = new_node( asmd.NodeKind.ND_SUB, lnode, primary )
         return node
     
+    if asmd.tkn[1].str == '[':
+        #配列の場合
+        newnode = new_node( ND.DEREF, 0, 0 )
+        newnode.lhs = new_node( ND.ND_ADD, 0, 0 )
+        newnode.lhs.lhs = primary()
+        del asmd.tkn[0] #[
+        newnode.lhs.rhs = expr()
+        if not consume( ']' ):
+            raise asmd.ManncError('配列が]で閉じられていません{0}'.format(asmd.tkn[0].str) )
+
+        return newnode
+
     # アドレス（ポインタ）用演算子
     if consume( '*' ):
         print('#ND.DEREF')
@@ -371,6 +408,7 @@ def primary():
             if not asmd.tkn[0].str in asmd.llvars :
                 raise asmd.ManncError('宣言されていない変数を使用しようとしています<{0}><{1}>'.format(asmd.tkn[0].str, asmd.llvars ) )
 
+            #配列ではない場合の場合
             newnode = asmd.Node()
             newnode.kind = asmd.NodeKind.ND_LVAR
             newnode.str = asmd.tkn[0].str
@@ -378,21 +416,13 @@ def primary():
             newnode.offset = asmd.llvars[ asmd.tkn[0].str ]
             newnode.type = asmd.llvars_t[ asmd.tkn[0].str ]
 
-            #if asmd.llvars_t[ asmd.tkn[0].str ].ty == TYP.INT :
-                #plusoffset = 4
-            #else :
-                #plusoffset = 8
-            #asmd.llvars[ asmd.tkn[0].str ] = asmd.offset + plusoffset
-            #newnode.offset = asmd.llvars[ asmd.tkn[0].str ]
-            #asmd.offset += plusoffset
-
-            print('### newnode.kind {0}'.format(newnode.kind ) )
-            print('### newnode.str {0}'.format(newnode.str ) )
-            print('### newnode.offset {0}'.format(newnode.offset ) )
-            print('### newnode.type {0}'.format(newnode.type ) )
-            
-        del asmd.tkn[0]
-        return newnode
+            print('### newnode.kind {0}'.format(newnode.kind ) );
+            print('### newnode.str {0}'.format(newnode.str ) );
+            print('### newnode.offset {0}'.format(newnode.offset ) );
+            print('### newnode.type {0}'.format(newnode.type ) );
+        
+            del asmd.tkn[0]
+            return newnode
 
     print('# primary()')
     if asmd.tkn[0].kind == TK.TK_NUM :

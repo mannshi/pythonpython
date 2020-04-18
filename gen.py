@@ -118,9 +118,11 @@ def gen( node ):
     # NodeKind が左辺値の場合
     if node.kind == ND.ND_LVAR :
         gen_lval( node )
-        print('\tpop rax')
-        print('\tmov rax, [rax]')
-        print('\tpush rax')
+        # 配列の場合のみアドレスが指す先をメモリから読み込む処理を飛ばす
+        if node.type != TYP.ARRAY:
+            print('\tpop rax')
+            print('\tmov rax, [rax]')
+            print('\tpush rax')
         return 
 
     # NodeKind が代入の場合

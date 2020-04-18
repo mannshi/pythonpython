@@ -26,6 +26,7 @@ code = []
 glvars = {}  #グローバル変数用
 llvars = {}  #スコープ（関数）毎にこの変数に代入する
 llvars_t = {} 
+llvars_s = {} 
 offset = 0
 functions = []
 
@@ -64,6 +65,7 @@ class Node:
         self.val = 0 # kindがND_NUMの場合のみ使う
         self.offset = 0 # kindがND_LVARの場合のみ使う
         self.type = 0
+        self.size = 0
 
 class NodeIF:
     def __init__(self):
@@ -86,11 +88,13 @@ class NodeFUNCCALL:
 class typ(Enum):
     INT   = auto()
     PTR   = auto()
+    ARRAY = auto()
 
 class myType:
     def __init__(self):
         self.ty = typ.INT;
         self.ptr_to = 0;
+        self.array_size = 0; # 配列の要素数（バイト数ではない？）
 
 class NodeFUNCDEF:
     def __init__(self):
