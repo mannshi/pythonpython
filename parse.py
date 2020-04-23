@@ -13,7 +13,7 @@ from asmd import typ as TYP
 # program = funcdef*
 #
 def program() :
-    while asmd.tkn[0].kind != TK.TK_EOF:
+    while asmd.tkn[0].kind != TK.EOF:
         asmd.code.append( funcdef() )
 
 #
@@ -31,7 +31,7 @@ def funcdef():
     newnode.type = TYP.INT
     print('#ftype {0}'.format( newnode.type ) )
 
-    if asmd.tkn[0].kind != TK.TK_IDENT:
+    if asmd.tkn[0].kind != TK.IDENT:
         raise asmd.ManncError( '関数の定義ではありません' )
         #print('関数の定義ではありません')
         #sys.exit()
@@ -58,7 +58,7 @@ def funcdef():
             raise asmd.ManncError( '関数の引数が型名からはじまりません。' + asmd.tkn[0].kind )
         del asmd.tkn[0]
 
-        if asmd.tkn[0].kind != TK.TK_IDENT:
+        if asmd.tkn[0].kind != TK.IDENT:
             raise asmd.ManncError('関数パラメータの定義がおかしいです B')
             #sys.exit()
 
@@ -106,7 +106,7 @@ def funcdef():
 # program = stmt*
 #
 #def program():
-#    while asmd.tkn[0].kind != TK.TK_EOF :
+#    while asmd.tkn[0].kind != TK.EOF :
 #        asmd.code.append( stmt() )
 
 #
@@ -158,17 +158,17 @@ def stmt():
 
     # 変数の宣言文の場合    
     if consume_tk( TK.INT ):
-        if asmd.tkn[0].kind != TK.TK_IDENT and asmd.tkn[0].str != '*':
+        if asmd.tkn[0].kind != TK.IDENT and asmd.tkn[0].str != '*':
             raise asmd.ManncError('型名の後ろが識別子 でも * でもありません')
 
-        if asmd.tkn[0].kind == TK.TK_IDENT :
+        if asmd.tkn[0].kind == TK.IDENT :
             if asmd.tkn[1].str == '[' :
                 #配列の場合
                 print('#配列の場合')
                 thistype = asmd.myType()
                 thistype.ty = TYP.ARRAY
 
-                if asmd.tkn[2].kind != TK.TK_NUM:
+                if asmd.tkn[2].kind != TK.NUM:
                     raise asmd.ManncError('配列の添え字が数字ではありません')
 
                 thistype.array_size = asmd.tkn[2].val
@@ -216,10 +216,10 @@ def stmt():
     if consume_tk( TK.IF ):
         return stmt_if()
         
-    if consume_tk( TK.TK_RETURN ) :
+    if consume_tk( TK.RETURN ) :
         print('#returrrrrrn')
         node = asmd.Node()
-        node.kind = asmd.NodeKind.ND_RETURN
+        node.kind = ND.RETURN
         print('#1')
         node.lhs = expr()
         print('#2')
@@ -250,7 +250,7 @@ def assign():
     print("# assign")
     node = equality()
     if consume( '=' ):
-        node = new_node( asmd.NodeKind.ND_ASSIGN, node, assign() )
+        node = new_node( ND.ASSIGN, node, assign() )
     return node
         
 #
@@ -263,9 +263,9 @@ def equality():
 
     while True:
         if consume( '==' ) :
-            node = new_node( asmd.NodeKind.ND_EQU, node, relational() )
+            node = new_node( ND.EQU, node, relational() )
         if consume( '!=' ) :
-            node = new_node( asmd.NodeKind.ND_NEQ, node, relational() )
+            node = new_node( ND.NEQ, node, relational() )
         break
 
     return node
@@ -281,13 +281,13 @@ def relational():
     while True:
         #if consume( '<' ) or consume( '<=' ) or consume( '>' ) or consume( '>=' ) :
         if consume( '<' ):
-            node = new_node( asmd.NodeKind.ND_LT, node, add() )
+            node = new_node( ND.LT, node, add() )
         elif consume( '<=' ):
-            node = new_node( asmd.NodeKind.ND_LTE, node, add() )
+            node = new_node( ND.LTE, node, add() )
         elif consume( '>' ):
-            node = new_node( asmd.NodeKind.ND_LT, add(), node )
+            node = new_node( ND.LT, add(), node )
         elif consume( '>=' ):
-            node = new_node( asmd.NodeKind.ND_LTE, add(), node )
+            node = new_node( ND.LTE, add(), node )
         else:
             return node
 
@@ -301,9 +301,9 @@ def add():
     print("# ADD")
     while True:
         if consume( '+' ) :
-            node = new_node( asmd.NodeKind.ND_ADD, node, mul() )
+            node = new_node( ND.ADD, node, mul() )
         elif consume( '-' ) :
-            node = new_node( asmd.NodeKind.ND_SUB, node, mul() )
+            node = new_node( ND.SUB, node, mul() )
         else:
             return node
     
@@ -316,9 +316,9 @@ def mul():
 
     while True:
         if consume( '*' ):
-            node = new_node( asmd.NodeKind.ND_MUL, node, primary() )
+            node = new_node( ND.MUL, node, primary() )
         elif consume( '/' ):
-            node = new_node( asmd.NodeKind.ND_DIV, node, primary() )
+            node = new_node( ND.DIV, node, primary() )
         else:
             return node
 
@@ -338,18 +338,18 @@ def unary():
 
     if consume( '+' ):
         lnode = new_node_num( 0 )
-        node = new_node( asmd.NodeKind.ND_ADD, lnode, primary )
+        node = new_node( ND.ADD, lnode, primary )
         return node
 
     if consume( '-' ):
         lnode = new_node_num( 0 )
-        node = new_node( asmd.NodeKind.ND_SUB, lnode, primary )
+        node = new_node( ND.SUB, lnode, primary )
         return node
     
     if asmd.tkn[1].str == '[':
         #配列の場合
         newnode = new_node( ND.DEREF, 0, 0 )
-        newnode.lhs = new_node( ND.ND_ADD, 0, 0 )
+        newnode.lhs = new_node( ND.ADD, 0, 0 )
         newnode.lhs.lhs = primary()
         del asmd.tkn[0] #[
         newnode.lhs.rhs = expr()
@@ -410,7 +410,7 @@ def primary():
 
             #配列ではない場合の場合
             newnode = asmd.Node()
-            newnode.kind = asmd.NodeKind.ND_LVAR
+            newnode.kind = ND.LVAR
             newnode.str = asmd.tkn[0].str
 
             newnode.offset = asmd.llvars[ asmd.tkn[0].str ]
@@ -425,11 +425,11 @@ def primary():
             return newnode
 
     print('# primary()')
-    if asmd.tkn[0].kind == TK.TK_NUM :
+    if asmd.tkn[0].kind == TK.NUM :
         print('#TK_NUMMMM')
         return new_node_num( expect_number() )
 
-    if asmd.tkn[0].kind == TK.TK_IDENT :
+    if asmd.tkn[0].kind == TK.IDENT :
         print('#primary_IDENT')
         return primary_IDENT()
 
@@ -457,7 +457,7 @@ def new_node( kind, lhs, rhs ):
 def new_node_num( val ):
     print('#newnode num {0}'.format(val))
     newnode = asmd.Node()
-    newnode.kind = asmd.NodeKind.ND_NUM
+    newnode.kind = ND.NUM
     newnode.val = val
 
     return newnode
@@ -477,14 +477,14 @@ def consume_tk(tk):
 # 0以外 の時は先読みしてトークンを消費しない
 def consume(op ):
     print('# consume tknknd {0}'.format(asmd.tkn[0].kind ))
-    if op == TK.TK_RETURN :
-        if asmd.tkn[0].kind == TK.TK_RETURN:
+    if op == TK.RETURN :
+        if asmd.tkn[0].kind == TK.RETURN:
             del asmd.tkn[0]
         else :
             return False
             
         
-    if asmd.tkn[0].kind != TK.TK_RESERVED or asmd.tkn[0].str != op:
+    if asmd.tkn[0].kind != TK.RESERVED or asmd.tkn[0].str != op:
         return False
 
     del asmd.tkn[0]
@@ -497,14 +497,14 @@ def saki( op, saki ):
     saki_kind = asmd.tkn[saki].kind
     saki_str  = asmd.tkn[saki].str
     
-    if saki_kind != TK.TK_RESERVED or saki_str != op:
+    if saki_kind != TK.RESERVED or saki_str != op:
         return False
 
     return True
 
 def expect( op ):
     print(" # expect {0}".format( op ) )
-    if asmd.tkn[0].kind != TK.TK_RESERVED or asmd.tkn[0].str != op:
+    if asmd.tkn[0].kind != TK.RESERVED or asmd.tkn[0].str != op:
         raise asmd.ManncError( "'{0}'ではありません".format(op) )
         #sys.exit()
 
@@ -513,7 +513,7 @@ def expect( op ):
 
 def expect_number():
     print('# expect_number  tknknd {0}'.format(asmd.tkn[0].kind ))
-    if asmd.tkn[0].kind != TK.TK_NUM:
+    if asmd.tkn[0].kind != TK.NUM:
         raise asmd.ManncError("数ではありません")
         #sys.exit()
 

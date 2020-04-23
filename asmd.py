@@ -3,17 +3,17 @@ from enum import Enum
 from enum import IntEnum, auto
 
 class TokenKind(Enum):
-    TK_RESERVED =  auto()
-    TK_IDENT    =  auto()
-    TK_NUM      =  auto()
-    TK_EOF      =  auto()
-    TK_RETURN   =  auto()
-    TK_WHILE    =  auto()
-    IF          =  auto()
-    ELSE        =  auto()
-    TK_FOR      =  auto()
-    INT         =  auto()
-    SIZEOF      =  auto()
+    RESERVED =  auto()
+    IDENT    =  auto()
+    NUM      =  auto()
+    EOF      =  auto()
+    RETURN   =  auto()
+    WHILE    =  auto()
+    IF       =  auto()
+    ELSE     =  auto()
+    TK_FOR   =  auto()
+    INT      =  auto()
+    SIZEOF   =  auto()
 
 tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')',
                      '==', '!=', '>', '>=', '<', '<=',
@@ -31,18 +31,18 @@ offset = 0
 functions = []
 
 class NodeKind(Enum):
-    ND_ADD   = auto()
-    ND_SUB   = auto()
-    ND_MUL   = auto()
-    ND_DIV   = auto()
-    ND_NUM   = auto()
-    ND_EQU   = auto()  # '=='
-    ND_NEQ   = auto()  # '!='
-    ND_LT    = auto()  # '<'
-    ND_LTE   = auto()  # '<='
-    ND_ASSIGN = auto() # '='
-    ND_LVAR = auto()
-    ND_RETURN = auto()
+    ADD   = auto()
+    SUB   = auto()
+    MUL   = auto()
+    DIV   = auto()
+    NUM   = auto()
+    EQU   = auto()  # '=='
+    NEQ   = auto()  # '!='
+    LT    = auto()  # '<'
+    LTE   = auto()  # '<='
+    ASSIGN = auto() # '='
+    LVAR = auto()
+    RETURN = auto()
     IF = auto()
     ELSE = auto()
     BLOCK = auto()

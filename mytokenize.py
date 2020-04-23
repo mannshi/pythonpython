@@ -25,7 +25,7 @@ def mytokenize(fname):
                 offset += 1
 
             newtkn = asmd.Token()
-            newtkn.kind = TK.TK_NUM
+            newtkn.kind = TK.NUM
             newtkn.val = int( tmpnum )
             asmd.tkn.append( newtkn )
 
@@ -49,13 +49,13 @@ def mytokenize(fname):
         elif tmpstr == 'else' :
             newtkn.kind = TK.ELSE
         elif tmpstr == 'return' :
-            newtkn.kind = TK.TK_RETURN
+            newtkn.kind = TK.RETURN
         elif tmpstr == 'int' :
             newtkn.kind = TK.INT
         elif tmpstr == 'sizeof' :
             newtkn.kind = TK.SIZEOF
         else :
-            newtkn.kind = TK.TK_IDENT
+            newtkn.kind = TK.IDENT
         newtkn.str = tmpstr
         asmd.tkn.append( newtkn )
 
@@ -72,7 +72,7 @@ def mytokenize(fname):
         if ch == '=' : # '!=' の場合
             newtkn = asmd.Token()
             newtkn.str = '!='
-            newtkn.kind = TK.TK_RESERVED
+            newtkn.kind = TK.RESERVED
             asmd.tkn.append( newtkn )
         else:
             offset -= 1
@@ -92,7 +92,7 @@ def mytokenize(fname):
         else: #'<' の場合
             newtkn.str = '<'
             offset -= 1
-        newtkn.kind = TK.TK_RESERVED
+        newtkn.kind = TK.RESERVED
         asmd.tkn.append( newtkn )
 
     def tk_equal():
@@ -110,7 +110,7 @@ def mytokenize(fname):
         else: #'=' の場合
             newtkn.str = '='
             offset -= 1
-        newtkn.kind = TK.TK_RESERVED
+        newtkn.kind = TK.RESERVED
         asmd.tkn.append( newtkn )
 
     def tk_great():
@@ -127,7 +127,7 @@ def mytokenize(fname):
         else: #'>' の場合
             newtkn.str = '>'
             offset -= 1
-        newtkn.kind = TK.TK_RESERVED
+        newtkn.kind = TK.RESERVED
         asmd.tkn.append( newtkn )
 
     #
@@ -155,7 +155,7 @@ def mytokenize(fname):
                ch == '(' or ch == ')' or ch == '{' or ch == '}' or \
                ch == ',' or ch == '&' or ch == '[' or ch == ']' :
                 newtkn = asmd.Token()
-                newtkn.kind = TK.TK_RESERVED
+                newtkn.kind = TK.RESERVED
                 newtkn.str = ch
                 asmd.tkn.append( newtkn )
                 continue
@@ -183,7 +183,7 @@ def mytokenize(fname):
     #
 
     newtkn = asmd.Token()
-    newtkn.kind = TK.TK_EOF
+    newtkn.kind = TK.EOF
     asmd.tkn.append( newtkn )
 #
 # トークナイザ  完了

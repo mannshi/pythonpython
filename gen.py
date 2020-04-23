@@ -84,7 +84,7 @@ def gen( node ):
         
     # NodeKindが、数値の場合
     # スタックにその値をプッシュする
-    if node.kind == ND.ND_NUM :
+    if node.kind == ND.NUM :
         print( '\tpush {0}'.format( node.val ) )
         return
 
@@ -116,7 +116,7 @@ def gen( node ):
         return
 
     # NodeKind が左辺値の場合
-    if node.kind == ND.ND_LVAR :
+    if node.kind == ND.LVAR :
         gen_lval( node )
         # 配列の場合のみアドレスが指す先をメモリから読み込む処理を飛ばす
         if node.type != TYP.ARRAY:
@@ -126,7 +126,7 @@ def gen( node ):
         return 
 
     # NodeKind が代入の場合
-    if node.kind == ND.ND_ASSIGN :
+    if node.kind == ND.ASSIGN :
 
         gen_lval( node.lhs )
         gen( node.rhs )
@@ -139,7 +139,7 @@ def gen( node ):
         return
 
     # NodeKind が reurn の場合
-    if node.kind == ND.ND_RETURN :
+    if node.kind == ND.RETURN :
         print('#NDRETUN')
         gen( node.lhs )
         print('#NDRETURN エピローグ')
@@ -161,36 +161,36 @@ def gen( node ):
     print('\tpop rdi')
     print('\tpop rax')
     
-    if node.kind == ND.ND_ADD :
+    if node.kind == ND.ADD :
         #ポインタの計算をする場合
 
         print('#add kind {0}'.format(node.lhs.kind))
 
-        if node.lhs.kind == ND.ND_LVAR:
+        if node.lhs.kind == ND.LVAR:
             print('#add type {0}'.format(node.lhs.type))
             if node.lhs.type == TYP.PTR :
                 print('\timul rdi, 4')
         print('\tadd rax, rdi')
-    elif node.kind == ND.ND_SUB :
+    elif node.kind == ND.SUB :
         print('\tsub rax, rdi')
-    elif node.kind == ND.ND_MUL :
+    elif node.kind == ND.MUL :
         print('\timul rax, rdi')
-    elif node.kind == ND.ND_DIV :
+    elif node.kind == ND.DIV :
         print('\tcqo')
         print('\tidiv rax, rdi')
-    elif node.kind == ND.ND_EQU :
+    elif node.kind == ND.EQU :
         print('\tcmp rax, rdi')
         print('sete al')
         print('movzb rax, al')
-    elif node.kind == ND.ND_NEQ :
+    elif node.kind == ND.NEQ :
         print('\tcmp rax, rdi')
         print('\tsetne al')
         print('\tmovzb rax, al')
-    elif node.kind == ND.ND_LT :
+    elif node.kind == ND.LT :
         print('\tcmp rax, rdi')
         print('\tsetl al')
         print('\tmovzb rax, al')
-    elif node.kind == ND.ND_LTE :
+    elif node.kind == ND.LTE :
         print('\tcmp rax, rdi')
         print('\tsetle al')
         print('\tmovzb rax, al')
@@ -203,7 +203,7 @@ def gen( node ):
 #
 
 def gen_lval(node):
-    if node.kind == ND.ND_LVAR:
+    if node.kind == ND.LVAR:
         var = node.str
         print('#here {0}'.format(var))
         offset = asmd.llvars[var]
