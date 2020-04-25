@@ -29,16 +29,15 @@ def mannc( filename ):
     #
     # ヘッダ
     print('.intel_syntax noprefix')
-    print('.global main')
-    # print('main:')
 
-    # プロローグ
-    #print('\tpush rbp')
-    #print('\tmov rbp, rsp')
-    #print('\tsub rsp, 208')
+    # グローバル変数のコードを出力する
+    gen.gen_gvar( )
+
+    print('.text')
+    print('.global main')
+
 
     # コード生成
-
     for nd in asmd.code:
         # 1stmt毎にループ
         gen.gen( nd )

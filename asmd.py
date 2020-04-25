@@ -23,11 +23,16 @@ tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')',
 
 tkn = []
 code = []
+
 glvars = {}  #グローバル変数用
+glvars_t = {}
+
 llvars = {}  #スコープ（関数）毎にこの変数に代入する
 llvars_t = {} 
 llvars_s = {} 
+
 offset = 0
+
 functions = []
 
 class NodeKind(Enum):
@@ -87,6 +92,7 @@ class NodeFUNCCALL:
 
 class typ(Enum):
     INT   = auto()
+    CHAR  = auto()
     PTR   = auto()
     ARRAY = auto()
 

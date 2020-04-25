@@ -203,8 +203,17 @@ def gen( node ):
 #
 
 def gen_lval(node):
+
+
     if node.kind == ND.LVAR:
         var = node.str
+
+        if var in asmd.glvars_t:
+            # グローバル変数の左辺値
+            print("\tpush offset {0}".format( var ) );
+            return
+
+        # グローバル変数でないときにローカル変数とみなす
         print('#here {0}'.format(var))
         offset = asmd.llvars[var]
         print('#gen_lval var={0} offset={1}'.format(var, offset ) )
@@ -220,3 +229,24 @@ def gen_lval(node):
         return 
 
     raise asmd.ManncError('代入の左辺値が変数ではありません')
+
+def gen_gvar():
+    if len( asmd.glvars_t ) == 0:
+        return
+
+    # 初期化しないグローバル変数を出力する
+
+    for gv in asmd.glvars_t:
+        print('.global {0}'.format(gv) )
+
+    print('.bss')
+    for gv in asmd.glvars_t:
+        print('.align 4')
+        print('{0}:'.format(gv) )
+        print('\t.zero 4' )
+
+    # 初期化するグローバル変数を出力する
+    # 未実装
+    print('.data')
+
+    return

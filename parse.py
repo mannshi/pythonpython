@@ -10,11 +10,83 @@ from asmd import typ as TYP
 #
 
 #
-# program = funcdef*
+# グローバル変数
+#
+def getgvar():
+
+
+    if asmd.tkn[0].str != 'int' and asmd.tkn[0].str != 'char':
+        raise asmd.ManncError( '変数の定義が型名からはじまりません。 1' )
+
+    #
+    # 型
+    #
+    if consume_tk( TK.INT ) :
+        thistype = asmd.myType()
+        if consume( '*' ) :
+            # intへのポインタ型
+            thistype.ty = TYP.PTR
+            thistype.ptr_to = asmd.myType()
+            thistype.ptr_to.ty = TYP.INT
+        else:
+            # int型
+            thistype.ty = TYP.INT
+    elif consume_tk( TK.CHAR ) :
+        if consume( '*' ) :
+            # charへのポインタ型
+            thistype.ty = TYP.PTR
+            thistype.ptr_to = asmd.myType()
+            thistype.ptr_to.ty = TYP.CHAR
+        else:
+            # char型
+            thistype.ty = TYP.CHAR
+    else:
+        raise asmd.ManncError( '変数の定義が型名からはじまりません。2 {0}'.format(asmd.tkn[0].str ) )
+
+    if asmd.tkn[0].str in asmd.glvars_t:
+        raise asmd.ManncError( 'グローバル変数が二重で宣言されています' )
+        
+    asmd.glvars_t[ asmd.tkn[0].str ] = thistype
+    
+    del asmd.tkn[0]
+
+    if consume( '=' ) :
+        #グローバル変数の初期化
+        raise asmd.ManncError( 'グローバル変数の初期化は未実装' )
+        pass
+
+    if not consume( ';' ):
+        raise asmd.ManncError( 'グローバル変数が ; で終了していません。{0}'.format( asmd.tkn[0].str ) )
+        
+    return
+
+#
+# program = ( funcdef | gvardef )*
 #
 def program() :
     while asmd.tkn[0].kind != TK.EOF:
-        asmd.code.append( funcdef() )
+        # グローバル変数？  関数定義？
+        if asmd.tkn[0].str != 'int' and asmd.tkn[0].str != 'char':
+            raise asmd.ManncError( '関数、変数の定義が型名からはじまりません。' )
+            
+        if asmd.tkn[1].str == '*' :
+            if asmd.tkn[2].kind != TK.IDENT: 
+                raise asmd.ManncError( '型名の後ろが識別子ではありません' )
+            if asmd.tkn[3].str == '(':
+                #ポインタを返す関数
+                asmd.code.append( funcdef() )
+            else:
+                #グローバルのポインタ変数
+                getgvar()
+        else:
+            if asmd.tkn[1].kind != TK.IDENT: 
+                raise asmd.ManncError( '型名の後ろが識別子ではありません' )
+            if asmd.tkn[2].str == '(':
+                #ポインタ以外を返す関数
+                asmd.code.append( funcdef() )
+            else:
+                #グローバルのポインタ以外の変数
+                getgvar()
 
 #
 # funcdef = ( idnet '(' ')' |
@@ -405,6 +477,14 @@ def primary():
 
         else :
             # 変数（左辺値）の場合
+            if asmd.tkn[0].str in asmd.glvars_t:
+                #グローバル変数として宣言されている場合
+                newnode = asmd.Node()
+                newnode.kind = ND.LVAR
+                newnode.str = asmd.tkn[0].str
+                del asmd.tkn[0]
+                return newnode
+
             if not asmd.tkn[0].str in asmd.llvars :
                 raise asmd.ManncError('宣言されていない変数を使用しようとしています<{0}><{1}>'.format(asmd.tkn[0].str, asmd.llvars ) )
 
