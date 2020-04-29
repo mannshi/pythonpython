@@ -13,6 +13,7 @@ class TokenKind(Enum):
     ELSE     =  auto()
     TK_FOR   =  auto()
     INT      =  auto()
+    CHAR     =  auto()
     SIZEOF   =  auto()
 
 tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')',
@@ -24,8 +25,26 @@ tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')',
 tkn = []
 code = []
 
+class MYType:
+    def __init__(self, kind, name, size, align, array_len, base):
+        self.kind = kind
+        self.name = name
+        self.size = size
+        self.align = align
+        self.array_len = array_len
+        self.base = base
+    
+class MYVar:
+    def __init__( self ):
+        self.name = 0
+        self.type = 0
+        self.offet = 0
+
 glvars = {}  #グローバル変数用
 glvars_t = {}
+
+lvars   = {}
+lvars_t = {}
 
 llvars = {}  #スコープ（関数）毎にこの変数に代入する
 llvars_t = {} 
@@ -99,6 +118,11 @@ class typ(Enum):
 class myType:
     def __init__(self):
         self.ty = typ.INT;
+        # 配列以外なら size = align だが
+        # 配列なら、align はその型のsizeになる 
+        # int num[100] は、800に整列しなくていいため
+        self.align = 0;
+        self.size = 0;
         self.ptr_to = 0;
         self.array_size = 0; # 配列の要素数（バイト数ではない？）
 
@@ -115,10 +139,9 @@ class NodeFUNCDEF:
         self.paranum = 0
         self.param_offset = []
 
-# 辞書を使うなら必要ない？
-class cLVar:
-    def __init__(self):
-        self.name = ''
-        self.offset = 0
-    
 class ManncError(Exception) : pass
+
+# offset が 2のべき乗の時（？） に
+# align 以上で、offset で割り切れる最小の値を返す？
+def align_to( offset, align ):
+    return ( offset + align -1 ) & ~ ( align -1 )

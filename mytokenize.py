@@ -52,6 +52,8 @@ def mytokenize(fname):
             newtkn.kind = TK.RETURN
         elif tmpstr == 'int' :
             newtkn.kind = TK.INT
+        elif tmpstr == 'int' :
+            newtkn.kind = TK.CHAR
         elif tmpstr == 'sizeof' :
             newtkn.kind = TK.SIZEOF
         else :

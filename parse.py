@@ -94,13 +94,16 @@ def program() :
 #
 def funcdef():
     newnode = asmd.NodeFUNCDEF()
+    newnode.type = asmd.myType()
 
-    if asmd.tkn[0].kind != TK.INT:
+    if asmd.tkn[0].kind == TK.INT:
+        newnode.type = TYP.INT
+    elif asmd.tkn[0].kind == TK.CHAR:
+        newnode.type = TYP.CHAR
+    else:
         raise asmd.ManncError( '関数の定義が型名からはじまりません。' )
     del asmd.tkn[0]
 
-    newnode.type = asmd.myType()
-    newnode.type = TYP.INT
     print('#ftype {0}'.format( newnode.type ) )
 
     if asmd.tkn[0].kind != TK.IDENT:
@@ -117,25 +120,25 @@ def funcdef():
 # primary()の返り値を newnode と lvars にする？
 #
     
+    asmd.offset = 0
+
     if not consume( '(' ):
         raise asmd.ManncError('関数パラメータの定義がおかしいです A')
-        #sys.exit()
 
     while True :
         if consume( ')' ):
             # 引数のない関数
             break;
 
-        if asmd.tkn[0].kind != TK.INT:
+        if not asmd.tkn[0].kind in [ TK.INT, TK.CHAR ]:
             raise asmd.ManncError( '関数の引数が型名からはじまりません。' + asmd.tkn[0].kind )
+
+        lvar.ty = asmd.tkn[0].kind
         del asmd.tkn[0]
 
         if asmd.tkn[0].kind != TK.IDENT:
             raise asmd.ManncError('関数パラメータの定義がおかしいです B')
-            #sys.exit()
 
-        #para = expr();
-        #newnode.lvars.append( para )
         newnode.paranum += 1
 
         # 関数引数のローカル変数用左辺値
@@ -143,10 +146,10 @@ def funcdef():
             # パラメータの変数名が重複する場合は考慮しない
             pass
         else :
-            newnode.lvars[ asmd.tkn[0].str ] = newnode.offset + 8
-            newnode.lvars_t[ asmd.tkn[0].str ] = asmd.myType()
+            #offset newnode.lvars[ asmd.tkn[0].str ] = newnode.offset + 8
+            newnode.lvars_t[ asmd.tkn[0].str ] = set_type( ty, 0, 0, 0, 0 )
             newnode.para.append( asmd.tkn[0].str )
-            newnode.offset += 8
+            #offset newnode.offset += 8
 
         del asmd.tkn[0]
 
@@ -162,14 +165,17 @@ def funcdef():
 
     # 関数の実行部分は BLOCK で書き換えられる？
     # BLOCKにしないと、genする時にうまく生成できない？
-    asmd.llvars = newnode.lvars.copy()
-    asmd.llvars_t = newnode.lvars_t.copy()
-    asmd.offset = newnode.offset
+    #asmd.llvars = newnode.lvars.copy()
+    #asmd.llvars_t = newnode.lvars_t.copy()
+    #asmd.offset = newnode.offset
+    #= newnode.lvars
 
     newnode.block = stmt()
 
-    newnode.lvars = asmd.llvars.copy()
-    newnode.lvars_t = asmd.llvars_t.copy()
+    #newnode.lvars = asmd.llvars.copy()
+    #newnode.lvars_t = asmd.llvars_t.copy()
+    #newnode.offset = asmd.offset
+
     newnode.offset = asmd.offset
 
     return newnode
@@ -229,7 +235,7 @@ def stmt():
         return node
 
     # 変数の宣言文の場合    
-    if consume_tk( TK.INT ):
+    if consume_tk( TK.INT ) or consume_tk( TK.CHAR ) :
         if asmd.tkn[0].kind != TK.IDENT and asmd.tkn[0].str != '*':
             raise asmd.ManncError('型名の後ろが識別子 でも * でもありません')
 
@@ -260,12 +266,24 @@ def stmt():
             else :
                 # 配列ではない変数の場合
                 # int型の場合
-                thistype = asmd.myType()
-                thistype.ty = TYP.INT
-                #asmd.offset += 4
-                asmd.offset += 8
-                asmd.llvars[ asmd.tkn[0].str ] = asmd.offset
-                asmd.llvars_t[ asmd.tkn[0].str ] = thistype.ty
+                #thistype = asmd.myType()
+                #thistype.ty = TYP.INT
+                # asmd.offset += 4
+                # asmd.offset += 8
+                # asmd.llvars[ asmd.tkn[0].str ] = asmd.offset
+                thistype = asmd.MYType( name = asmd.tkn[0].str, \
+                                        kind = TYP.INT, \
+                                        size = 4, \
+                                        align = 4, \
+                                        array_len = 0, \
+                                        base = 0 )
+                asmd.lvars_t[ asmd.tkn[0].str ] = thistype
+                print('#old offset={0} align={1}'.format(asmd.offset, 4))
+                asmd.offset = asmd.align_to( asmd.offset, 4 )
+                asmd.offset += asmd.lvars_t[ asmd.tkn[0].str ].size
+                asmd.lvars[ asmd.tkn[0].str ] = asmd.MYVar()
+                asmd.lvars[ asmd.tkn[0].str ].offset = asmd.offset
+                print('#new offset={0}'.format(asmd.lvars[ asmd.tkn[0].str ]) )
                 del asmd.tkn[0]
         else :
             # int型へのポインタの場合
@@ -485,22 +503,17 @@ def primary():
                 del asmd.tkn[0]
                 return newnode
 
-            if not asmd.tkn[0].str in asmd.llvars :
-                raise asmd.ManncError('宣言されていない変数を使用しようとしています<{0}><{1}>'.format(asmd.tkn[0].str, asmd.llvars ) )
+            if not asmd.tkn[0].str in asmd.lvars :
+                raise asmd.ManncError('宣言されていない変数を使用しようとしています<{0}><{1}>'.format(asmd.tkn[0].str, asmd.lvars ) )
 
-            #配列ではない場合の場合
+            #配列ではない場合
             newnode = asmd.Node()
             newnode.kind = ND.LVAR
             newnode.str = asmd.tkn[0].str
 
-            newnode.offset = asmd.llvars[ asmd.tkn[0].str ]
-            newnode.type = asmd.llvars_t[ asmd.tkn[0].str ]
+            newnode.offset = asmd.lvars[ asmd.tkn[0].str ]
+            newnode.type = asmd.lvars_t[ asmd.tkn[0].str ]
 
-            print('### newnode.kind {0}'.format(newnode.kind ) );
-            print('### newnode.str {0}'.format(newnode.str ) );
-            print('### newnode.offset {0}'.format(newnode.offset ) );
-            print('### newnode.type {0}'.format(newnode.type ) );
-        
             del asmd.tkn[0]
             return newnode
 
@@ -603,3 +616,24 @@ def expect_number():
     del asmd.tkn[0]
 
     return val
+
+def set_type( ty, size, align, ptr_to, array_size ):
+        
+        newtype = asmd.myType()
+
+        if ty == TK.INT or ty == TK.CHAR:
+            newtype.size = size;
+            newtype.align = align;
+        elif ty == TK.CHAR:
+            newtype.size = 1;
+            newtype.align = 1;
+        else:
+            newtype.size = size * array_size
+
+        #newtype.ty = ty;
+        #newtype.align = align;
+        #newtype.size = size;
+        #newtype.ptr_to = ptr_to;
+        #newtype.array_size = array_size; # 配列の要素数（バイト数ではない？）
+    
+        return newtype

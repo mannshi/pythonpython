@@ -21,6 +21,7 @@ def gen( node ):
         gen( node.lhs )
         print('\tpop rax')
         print('\tmov rax, [rax]')
+        print('#raxtest 1')
         print('\tpush rax')
         return
 
@@ -32,6 +33,7 @@ def gen( node ):
         print('#プロローグ')
         print('\tpush rbp')
         print('\tmov rbp, rsp')
+        #print('\tsub rsp, {0}'.format(node.offset))
         print('\tsub rsp, {0}'.format(node.offset))
 
         # レジスタの中身をパラメータにコピーする
@@ -78,6 +80,7 @@ def gen( node ):
                 #sys.exit()
             pcnt += 1
         print('\tcall {0}'.format(node.name) )
+        print('#raxtest 2')
         print('\tpush rax')
         
         return
@@ -91,6 +94,8 @@ def gen( node ):
     if node.kind == ND.BLOCK:
         for stmt in node.stmts:
             gen( stmt )
+            print('#raxtest 3')
+            #print('\tpush rax')
         return 
 
     if node.kind == ND.IF :
@@ -122,6 +127,7 @@ def gen( node ):
         if node.type != TYP.ARRAY:
             print('\tpop rax')
             print('\tmov rax, [rax]')
+            print('#raxtest 4')
             print('\tpush rax')
         return 
 
@@ -133,7 +139,15 @@ def gen( node ):
 
         print('\tpop rdi')
         print('\tpop rax')
-        print('\tmov [rax], rdi')
+
+        # サイズによって使用するレジスタを変える
+        if node.size == 1:
+            print('\tmov [rax], dil')
+        elif node.size == 4:
+            print('\tmov [rax], edi')
+        else
+            print('\tmov [rax], rdi')
+
         print('\tpush rdi')
 
         return
@@ -195,6 +209,7 @@ def gen( node ):
         print('\tsetle al')
         print('\tmovzb rax, al')
 
+    print('#raxtesta5')
     print('\tpush rax')
 
     return
@@ -215,11 +230,12 @@ def gen_lval(node):
 
         # グローバル変数でないときにローカル変数とみなす
         print('#here {0}'.format(var))
-        offset = asmd.llvars[var]
+        offset = asmd.lvars[var].offset
         print('#gen_lval var={0} offset={1}'.format(var, offset ) )
 
         print('\tmov rax, rbp')
-        print('\tsub rax, {0}'.format(asmd.llvars[node.str]))
+        print('\tsub rax, {0}'.format(offset))
+        print('#raxtest 6')
         print('\tpush rax')
 
         return 
