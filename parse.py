@@ -235,7 +235,10 @@ def stmt():
         return node
 
     # 変数の宣言文の場合    
-    if consume_tk( TK.INT ) or consume_tk( TK.CHAR ) :
+    if asmd.tkn[0].kind in ( TK.INT, TK.CHAR ):
+        tknkind = asmd.tkn[0].kind 
+        del asmd.tkn[0]
+        
         if asmd.tkn[0].kind != TK.IDENT and asmd.tkn[0].str != '*':
             raise asmd.ManncError('型名の後ろが識別子 でも * でもありません')
 
@@ -265,21 +268,30 @@ def stmt():
                 
             else :
                 # 配列ではない変数の場合
-                # int型の場合
-                #thistype = asmd.myType()
-                #thistype.ty = TYP.INT
-                # asmd.offset += 4
-                # asmd.offset += 8
-                # asmd.llvars[ asmd.tkn[0].str ] = asmd.offset
-                thistype = asmd.MYType( name = asmd.tkn[0].str, \
-                                        kind = TYP.INT, \
-                                        size = 4, \
-                                        align = 4, \
-                                        array_len = 0, \
-                                        base = 0 )
+                if tknkind == TK.INT:
+                    thistype = asmd.MYType( name = asmd.tkn[0].str, \
+                                            kind = TYP.INT, \
+                                            size = 4, \
+                                            align = 4, \
+                                            array_len = 0, \
+                                            base = 0 )
+                elif tknkind == TK.CHAR:
+                    thistype = asmd.MYType( name = asmd.tkn[0].str, \
+                                            kind = TYP.CHAR, \
+                                            size = 1, \
+                                            align = 1, \
+                                            array_len = 0, \
+                                            base = 0 )
+                else:
+                    thistype = asmd.MYType( name = asmd.tkn[0].str, \
+                                            kind = TYP.PTR, \
+                                            size = 4, \
+                                            align = 4, \
+                                            array_len = 0, \
+                                            base = 0 )
+
                 asmd.lvars_t[ asmd.tkn[0].str ] = thistype
-                print('#old offset={0} align={1}'.format(asmd.offset, 4))
-                asmd.offset = asmd.align_to( asmd.offset, 4 )
+                asmd.offset = asmd.align_to( asmd.offset, thistype.align )
                 asmd.offset += asmd.lvars_t[ asmd.tkn[0].str ].size
                 asmd.lvars[ asmd.tkn[0].str ] = asmd.MYVar()
                 asmd.lvars[ asmd.tkn[0].str ].offset = asmd.offset
