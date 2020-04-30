@@ -33,18 +33,28 @@ def gen( node ):
         print('#プロローグ')
         print('\tpush rbp')
         print('\tmov rbp, rsp')
-        #print('\tsub rsp, {0}'.format(node.offset))
         print('\tsub rsp, {0}'.format(node.offset))
 
         # レジスタの中身をパラメータにコピーする
         para_i = 0
-        para_reg = [ "rdi", "rsi", "rdx", "rcx" ];
+        para_reg64 = [ "rdi", "rsi", "rdx", "rcx" ];
+        para_reg32 = [ "edi", "esi", "edx", "ecx" ];
+        para_reg8  = [ "dil", "sil", "dl",  "cl" ];
         while para_i < node.paranum :
             print("#para{0}".format(para_i) )
             print("#para{0}".format(node.para[para_i]) )
             print("\tmov rax, rbp\n");
-            print("\tsub rax, {0}\n".format(node.lvars[node.para[para_i]]));
-            print("\tmov [rax], {0}\n".format(para_reg[para_i]));
+            #print("#DDDDEBUG {0}".format( node.para[para_i] ) )
+            print("\tsub rax, {0}\n".format(node.lvars[ node.para[para_i] ].offset));
+            if node.lvars_t[ node.para[para_i] ].size == 8:
+                print("\tmov [rax], {0}\n".format(para_reg64[para_i]));
+            elif node.lvars_t[ node.para[para_i] ].size == 4:
+                print("\tmov [rax], {0}\n".format(para_reg32[para_i]));
+            elif node.lvars_t[ node.para[para_i] ].size == 1:
+                print("\tmov [rax], {0}\n".format(para_reg8[para_i]));
+            else :
+                raise asmd.ManncError('代入のサイズがおかしい')
+            
             para_i += 1
             
         asmd.llvars = node.lvars.copy()

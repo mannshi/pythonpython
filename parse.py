@@ -94,33 +94,23 @@ def program() :
 #
 def funcdef():
     newnode = asmd.NodeFUNCDEF()
-    newnode.type = asmd.myType()
 
     if asmd.tkn[0].kind == TK.INT:
-        newnode.type = TYP.INT
+        newnode.type = asmd.MYType( name = asmd.tkn[0].str, kind = TYP.INT,  size = 4, align = 4, array_len = 0, base = 0 )
     elif asmd.tkn[0].kind == TK.CHAR:
-        newnode.type = TYP.CHAR
+        newnode.type = asmd.MYType( name = asmd.tkn[0].str, kind = TYP.CHAR, size = 1, align = 1, array_len = 0, base = 0 )
     else:
         raise asmd.ManncError( '関数の定義が型名からはじまりません。' )
     del asmd.tkn[0]
 
-    print('#ftype {0}'.format( newnode.type ) )
-
     if asmd.tkn[0].kind != TK.IDENT:
         raise asmd.ManncError( '関数の定義ではありません' )
-        #print('関数の定義ではありません')
-        #sys.exit()
 
     newnode.kind = ND.FUNCDEF
     newnode.name = asmd.tkn[0].str
     del asmd.tkn[0]
 
-#
-# ここでグローバル変数の lvars を初期化する？
-# primary()の返り値を newnode と lvars にする？
-#
-    
-    asmd.offset = 0
+    newnode.offset = 0
 
     if not consume( '(' ):
         raise asmd.ManncError('関数パラメータの定義がおかしいです A')
@@ -133,7 +123,7 @@ def funcdef():
         if not asmd.tkn[0].kind in [ TK.INT, TK.CHAR ]:
             raise asmd.ManncError( '関数の引数が型名からはじまりません。' + asmd.tkn[0].kind )
 
-        lvar.ty = asmd.tkn[0].kind
+        paratype = asmd.tkn[0].kind
         del asmd.tkn[0]
 
         if asmd.tkn[0].kind != TK.IDENT:
@@ -141,15 +131,35 @@ def funcdef():
 
         newnode.paranum += 1
 
+        vname = asmd.tkn[0].str
+
         # 関数引数のローカル変数用左辺値
         if asmd.tkn[0].str in newnode.lvars :
             # パラメータの変数名が重複する場合は考慮しない
             pass
         else :
-            #offset newnode.lvars[ asmd.tkn[0].str ] = newnode.offset + 8
-            newnode.lvars_t[ asmd.tkn[0].str ] = set_type( ty, 0, 0, 0, 0 )
-            newnode.para.append( asmd.tkn[0].str )
-            #offset newnode.offset += 8
+
+            thistype = asmd.myType()
+
+            if paratype == TK.INT:
+                thistype = asmd.MYType( name = vname, kind = TYP.INT,  size = 4, align = 4, array_len = 0, base = 0 )
+            elif paratype == TK.CHAR:
+                thistype = asmd.MYType( name = vname, kind = TYP.CHAR, size = 1, align = 1, array_len = 0, base = 0 )
+            else :
+                thistype = asmd.MYType( name = vname, kind = TYP.PTR,  size = 4, align = 4, array_len = 0, base = 0 )
+
+            newnode.lvars_t[ vname ] = thistype
+            newnode.para.append( vname )
+
+            newnode.lvars[ vname ] = asmd.MYVar()
+            newnode.lvars[ vname ].name = vname
+            newnode.lvars[ vname ].type = thistype
+            newnode.lvars[ vname ].offset  = asmd.align_to( newnode.offset, thistype.align )
+            newnode.lvars[ vname ].offset += newnode.lvars[ vname ].type.size 
+            
+            #print("#DDDDEBUG {0},{1}".format( vname, newnode.lvars[vname].offset ) )
+            newnode.offset += newnode.lvars_t[ vname ].size
+            #newnode.lvars[ vname ] = newnode.offset
 
         del asmd.tkn[0]
 
@@ -165,17 +175,16 @@ def funcdef():
 
     # 関数の実行部分は BLOCK で書き換えられる？
     # BLOCKにしないと、genする時にうまく生成できない？
-    #asmd.llvars = newnode.lvars.copy()
-    #asmd.llvars_t = newnode.lvars_t.copy()
-    #asmd.offset = newnode.offset
-    #= newnode.lvars
+
+    #print("#DDDDEBUG {0}".format( newnode.offset ) )
+    asmd.offset =   newnode.offset
+    asmd.lvars = newnode.lvars
+    asmd.lvars_t = newnode.lvars_t
 
     newnode.block = stmt()
 
-    #newnode.lvars = asmd.llvars.copy()
-    #newnode.lvars_t = asmd.llvars_t.copy()
-    #newnode.offset = asmd.offset
-
+    newnode.lvars = asmd.lvars.copy()
+    newnode.lvars_t = asmd.lvars_t.copy()
     newnode.offset = asmd.offset
 
     return newnode
