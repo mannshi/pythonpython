@@ -126,7 +126,12 @@ def gen( node ):
         # 配列の場合のみアドレスが指す先をメモリから読み込む処理を飛ばす
         if node.type != TYP.ARRAY:
             print('\tpop rax')
-            print('\tmov rax, [rax]')
+            if node.size == 1:
+                print('\tmovsx rax, byte ptr [rax]')
+            elif node.size == 4:
+                print('\tmovsxd rax, dword ptr[rax]')
+            else:
+                print('\tmov rax, [rax]')
             print('#raxtest 4')
             print('\tpush rax')
         return 
@@ -141,11 +146,12 @@ def gen( node ):
         print('\tpop rax')
 
         # サイズによって使用するレジスタを変える
-        if node.size == 1:
+        print('#assign size {0}'.format( node.lhs.size ))
+        if node.lhs.size == 1:
             print('\tmov [rax], dil')
-        elif node.size == 4:
+        elif node.lhs.size == 4:
             print('\tmov [rax], edi')
-        else
+        else:
             print('\tmov [rax], rdi')
 
         print('\tpush rdi')
@@ -178,6 +184,7 @@ def gen( node ):
     if node.kind == ND.ADD :
         #ポインタの計算をする場合
 
+        print('#addddddddddd')
         print('#add kind {0}'.format(node.lhs.kind))
 
         if node.lhs.kind == ND.LVAR:

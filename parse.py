@@ -510,6 +510,7 @@ def primary():
             newnode = asmd.Node()
             newnode.kind = ND.LVAR
             newnode.str = asmd.tkn[0].str
+            newnode.size = asmd.lvars_t[ asmd.tkn[0].str ].size
 
             newnode.offset = asmd.lvars[ asmd.tkn[0].str ]
             newnode.type = asmd.lvars_t[ asmd.tkn[0].str ]
