@@ -57,7 +57,8 @@ def gen( node ):
             
             para_i += 1
             
-        asmd.llvars = node.lvars.copy()
+        #asmd.llvars = node.lvars.copy()
+        asmd.lvars = node.lvars.copy()
 
         # 関数本体（ブロック）を出力する
         gen( node.block )

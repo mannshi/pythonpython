@@ -188,6 +188,12 @@ def funcdef():
     print('#DBG2 {0}'.format( asmd.lvars ) )
     newnode.lvars = copy.deepcopy( asmd.lvars )
     print('#DBG3 {0}'.format( newnode.lvars ) )
+
+    #para_i = 0
+    #while para_i < newnode.paranum :
+        #print("#{0} size={1}".format( para_i, newnode.lvars_t[ newnode.para[para_i] ].size ) )
+        #para_i += 1
+
     newnode.lvars_t = copy.deepcopy( asmd.lvars_t )
     newnode.offset = asmd.offset
 
