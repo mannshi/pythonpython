@@ -39,6 +39,11 @@ def mannc( filename ):
 
     # コード生成
     for nd in asmd.code:
+
+        asmd.offset =   nd.offset
+        asmd.lvars_t = nd.lvars_t
+        asmd.lvars = nd.lvars
+
         # 1stmt毎にループ
         gen.gen( nd )
         # 1stmtはスタックに値を残すので rax に pop する

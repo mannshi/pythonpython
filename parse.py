@@ -3,6 +3,7 @@ import asmd
 from asmd import TokenKind as TK
 from asmd import NodeKind as ND
 from asmd import typ as TYP
+import copy
 
 
 #
@@ -176,15 +177,18 @@ def funcdef():
     # 関数の実行部分は BLOCK で書き換えられる？
     # BLOCKにしないと、genする時にうまく生成できない？
 
-    #print("#DDDDEBUG {0}".format( newnode.offset ) )
     asmd.offset =   newnode.offset
-    asmd.lvars = newnode.lvars
-    asmd.lvars_t = newnode.lvars_t
+    asmd.lvars_t = copy.deepcopy( newnode.lvars_t )
+    asmd.lvars = copy.deepcopy( newnode.lvars )
+    print('#DBG0 {0}'.format( newnode.name ) )
+    print('#DBG1 {0}'.format( newnode.lvars ) )
 
     newnode.block = stmt()
 
-    newnode.lvars = asmd.lvars.copy()
-    newnode.lvars_t = asmd.lvars_t.copy()
+    print('#DBG2 {0}'.format( asmd.lvars ) )
+    newnode.lvars = copy.deepcopy( asmd.lvars )
+    print('#DBG3 {0}'.format( newnode.lvars ) )
+    newnode.lvars_t = copy.deepcopy( asmd.lvars_t )
     newnode.offset = asmd.offset
 
     return newnode
