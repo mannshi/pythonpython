@@ -153,8 +153,11 @@ def mytokenize(fname):
             ch = chb.decode('utf-8')
 
         newtkn = asmd.Token()
+        asmd.strings.append( tmpstr )
+
         newtkn.kind = TK.STRING
-        newtkn.val = tmpstr
+        newtkn.val = asmd.strings
+
         asmd.tkn.append( newtkn )
 
         # ダブルクォーテーションを読み捨てる

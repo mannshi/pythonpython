@@ -55,6 +55,8 @@ offset = 0
 
 functions = []
 
+strings = []
+
 class NodeKind(Enum):
     ADD   = auto()
     SUB   = auto()
@@ -75,6 +77,7 @@ class NodeKind(Enum):
     FUNCDEF = auto()
     ADDR = auto()
     DEREF = auto()
+    STRING = auto()
 
 class Token:
     def __init__(self):
@@ -87,7 +90,7 @@ class Node:
         self.kind = 0
         self.lhs = 0
         self.rhs = 0
-        self.val = 0 # kindがND_NUMの場合のみ使う
+        self.val = 0 # kindがND_NUMの場合のみ使う/STRING の場合は文字列のIDとする
         self.offset = 0 # kindがND_LVARの場合のみ使う
         self.type = 0
         self.size = 0

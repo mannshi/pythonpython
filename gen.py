@@ -265,11 +265,10 @@ def gen_lval(node):
     raise asmd.ManncError('代入の左辺値が変数ではありません')
 
 def gen_gvar():
-    if len( asmd.glvars_t ) == 0:
-        return
+    #if len( asmd.glvars_t ) == 0:
+        #return
 
     # 初期化しないグローバル変数を出力する
-
     for gv in asmd.glvars_t:
         print('.global {0}'.format(gv) )
 
@@ -279,8 +278,25 @@ def gen_gvar():
         print('{0}:'.format(gv) )
         print('\t.zero 4' )
 
+    print('.data')
     # 初期化するグローバル変数を出力する
     # 未実装
-    print('.data')
+    
+    # 文字列のデータを出力する
+    gen_strings()
+
+    return
+
+def gen_strings():
+    idx = 0
+    for string in asmd.strings:
+        print('.align 1:')
+        print('.L.strings.{0}:'.format(idx))
+        chi = 0
+        while chi < len(string):
+            print('\t.byte {0}'.format(ord(string[chi])))
+            chi +=1
+        print('\t.byte 0')
+        idx += 1
 
     return
