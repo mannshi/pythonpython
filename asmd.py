@@ -15,6 +15,7 @@ class TokenKind(Enum):
     INT      =  auto()
     CHAR     =  auto()
     SIZEOF   =  auto()
+    STRING   =  auto()
 
 tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')',
                      '==', '!=', '>', '>=', '<', '<=',

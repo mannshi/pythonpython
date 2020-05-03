@@ -132,6 +132,36 @@ def mytokenize(fname):
         newtkn.kind = TK.RESERVED
         asmd.tkn.append( newtkn )
 
+    def tk_string():
+        nonlocal ch
+        nonlocal offset
+    
+        #offset += 1
+        f.seek( offset )
+        chb = f.read(1)
+        ch = chb.decode('utf-8')
+        tmpstr = ''
+        while True:
+            if ch == '"':
+                break
+            print('string={0}'.format(ch))
+            tmpstr += ch
+
+            offset += 1
+            f.seek( offset )
+            chb = f.read(1)
+            ch = chb.decode('utf-8')
+
+        newtkn = asmd.Token()
+        newtkn.kind = TK.STRING
+        newtkn.val = tmpstr
+        asmd.tkn.append( newtkn )
+
+        # ダブルクォーテーションを読み捨てる
+        offset += 1
+        chb = f.read(1)
+
+
     #
     # 関数内関数 おわり
     #
@@ -150,7 +180,7 @@ def mytokenize(fname):
             offset += 1
             if ch == '' : break
 
-            if ch == '\n' or ch == ' ': continue
+            if ch == '\n' or ch == ' ' : continue
 
             # 一文字のトークン の場合
             if ch == ';' or ch == '+' or ch == '-' or ch == '*' or ch == '/' or \
@@ -176,6 +206,9 @@ def mytokenize(fname):
 
             # 変数の場合
             if ch.isalpha(): tk_alphabet(); continue
+
+            # 文字列の場合
+            if ch == '"' : tk_string(); continue
 
             # 数字の場合    
             tk_number()

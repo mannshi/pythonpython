@@ -549,6 +549,11 @@ def primary():
             del asmd.tkn[0]
             return newnode
 
+    if asmd.tkn[0].kind == TK.STRING :
+        print('#parse string')
+        del asmd.tkn[0]
+        return new_node_num( 99 )
+
     print('# primary()')
     if asmd.tkn[0].kind == TK.NUM :
         print('#TK_NUMMMM')
