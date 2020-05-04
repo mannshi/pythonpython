@@ -13,6 +13,9 @@ import copy
 #
 # グローバル変数
 #
+def getgvar2():
+    return
+
 def getgvar():
 
 
@@ -304,8 +307,8 @@ def stmt():
                 else:
                     thistype = asmd.MYType( name = asmd.tkn[0].str, \
                                             kind = TYP.PTR, \
-                                            size = 4, \
-                                            align = 4, \
+                                            size = 8, \
+                                            align = 8, \
                                             array_len = 0, \
                                             base = 0 )
 
@@ -317,15 +320,24 @@ def stmt():
                 print('#new offset={0}'.format(asmd.lvars[ asmd.tkn[0].str ]) )
                 del asmd.tkn[0]
         else :
-            # int型へのポインタの場合
+            # asmd.tkn[0] == '*' の場合
             del asmd.tkn[0]
+
+            # ポインタ用の領域
+            varname = asmd.tkn[0].str
+            thistype = asmd.MYType( name = varname, kind = TYP.PTR, size = 8, align = 8, array_len = 0, base = 0 )
+
+            if tknkind == TK.INT:
+            # int型へのポインタの場合
+                nexttype = asmd.MYType( name = '', kind = TYP.INT, size = 4, align = 4, array_len = 0, base = 0 )
+            elif tknkind == TK.CHAR:
+                nexttype = asmd.MYType( name = '', kind = TYP.CHAR,size = 1, align = 1, array_len = 0, base = 0 )
+            thistype.base = nexttype
+
             asmd.offset += 8
-            asmd.llvars[ asmd.tkn[0].str ] = asmd.offset
-            thistype = asmd.myType()
-            thistype.ty = TYP.PTR
-            thistype.ptr_to = asmd.myType()
-            thistype.ptr_to.ty = TYP.INT
-            asmd.llvars_t[ asmd.tkn[0].str ] = thistype.ty
+            asmd.lvars[ varname ] = asmd.offset
+            asmd.lvars_t[ varname ] = thistype
+
             del asmd.tkn[0]
 
         if not consume( ';' ):
@@ -551,8 +563,12 @@ def primary():
 
     if asmd.tkn[0].kind == TK.STRING :
         print('#parse string')
+        newnode = asmd.Node()
+        newnode.kind = ND.STRING
+        newnode.val = asmd.tkn[0].val
+
         del asmd.tkn[0]
-        return new_node_num( 99 )
+        return newnode
 
     print('# primary()')
     if asmd.tkn[0].kind == TK.NUM :

@@ -26,6 +26,16 @@ tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')',
 tkn = []
 code = []
 
+class TypeType:
+    def __init__(self, kind, size, align, array_len, base, function):
+        self.kind
+        self.size
+        self.align
+        self.array_len
+        self.base # pointer or array
+        self.function
+
+
 class MYType:
     def __init__(self, kind, name, size, align, array_len, base):
         self.kind = kind

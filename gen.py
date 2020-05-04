@@ -13,6 +13,14 @@ def gen( node ):
     if node == 0:
         return
 
+    if node.kind == ND.STRING :
+        print("\tpush offset .L.strings.{0}".format( node.val ) );
+        print('\tpop rax')
+        print('\tmov rax, [rax]')
+        print('\tpush rax')
+        return
+
+
     if node.kind == ND.ADDR :
         gen_lval( node.lhs )
         return
@@ -290,7 +298,7 @@ def gen_gvar():
 def gen_strings():
     idx = 0
     for string in asmd.strings:
-        print('.align 1:')
+        print('.align 1')
         print('.L.strings.{0}:'.format(idx))
         chi = 0
         while chi < len(string):

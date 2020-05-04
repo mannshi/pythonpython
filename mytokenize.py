@@ -156,7 +156,7 @@ def mytokenize(fname):
         asmd.strings.append( tmpstr )
 
         newtkn.kind = TK.STRING
-        newtkn.val = asmd.strings
+        newtkn.val = len ( asmd.strings ) -1
 
         asmd.tkn.append( newtkn )
 
