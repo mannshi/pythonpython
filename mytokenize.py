@@ -144,7 +144,7 @@ def mytokenize(fname):
         while True:
             if ch == '"':
                 break
-            print('string={0}'.format(ch))
+            #print('string={0}'.format(ch))
             tmpstr += ch
 
             offset += 1

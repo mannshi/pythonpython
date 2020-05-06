@@ -3,6 +3,11 @@ import sys
 from asmd import NodeKind as ND
 from asmd import typ as TYP
 
+
+para_reg64 = [ "rdi", "rsi", "rdx", "rcx" ];
+para_reg32 = [ "edi", "esi", "edx", "ecx" ];
+para_reg8  = [ "dil", "sil", "dl",  "cl" ];
+
 if_num = 0
 #
 # コード生成
@@ -34,6 +39,9 @@ def gen( node ):
         return
 
     if node.kind == ND.FUNCDEF :
+
+        node.myself()
+
         # 関数の名前＝ラベル
         print("{0}:".format(node.name))
 
@@ -45,9 +53,9 @@ def gen( node ):
 
         # レジスタの中身をパラメータにコピーする
         para_i = 0
-        para_reg64 = [ "rdi", "rsi", "rdx", "rcx" ];
-        para_reg32 = [ "edi", "esi", "edx", "ecx" ];
-        para_reg8  = [ "dil", "sil", "dl",  "cl" ];
+        #para_reg64 = [ "rdi", "rsi", "rdx", "rcx" ];
+        #para_reg32 = [ "edi", "esi", "edx", "ecx" ];
+        #para_reg8  = [ "dil", "sil", "dl",  "cl" ];
         while para_i < node.paranum :
             print("#para{0}".format(para_i) )
             print("#para{0}".format(node.para[para_i]) )
@@ -151,7 +159,6 @@ def gen( node ):
                 print('\tmovsxd rax, dword ptr[rax]')
             else:
                 print('\tmov rax, [rax]')
-            print('#raxtest 4')
             print('\tpush rax')
         return 
 
@@ -281,10 +288,11 @@ def gen_gvar():
         print('.global {0}'.format(gv) )
 
     print('.bss')
-    for gv in asmd.glvars_t:
-        print('.align 4')
-        print('{0}:'.format(gv) )
-        print('\t.zero 4' )
+    for gv in asmd.glvars_t.keys():
+        print('.align {0}'.format(asmd.glvars_t[gv].align) )
+        print('{0}:'.format( gv ) )
+        print('\t.zero {0}'.format(asmd.glvars_t[gv].size) )
+        #print('\t.zero 4' )
 
     print('.data')
     # 初期化するグローバル変数を出力する

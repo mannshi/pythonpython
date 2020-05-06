@@ -28,12 +28,14 @@ code = []
 
 class TypeType:
     def __init__(self, kind, size, align, array_len, base, function):
-        self.kind
-        self.size
-        self.align
-        self.array_len
-        self.base # pointer or array
-        self.function
+        self.kind = kind
+        self.size = size
+        self.align = align
+        self.array_len = array_len
+        self.base  = base # pointer or array
+        self.function = function
+    def myself(self):
+        print('#kind={0} size={1} align={2} array_len={3} base={4}'.format(self.kind, self.size, self.align, self.array_len, self.base))
 
 
 class MYType:
@@ -44,6 +46,9 @@ class MYType:
         self.align = align
         self.array_len = array_len
         self.base = base
+    def myself(self):
+        print('#kind={:                                        0} name={1}, size={2} align={3} array_len={4} base={5}'.format(self.kind, self.name, self.size, self.align, self.array_len, self.base))
+        return
     
 class MYVar:
     def __init__( self ):
@@ -51,7 +56,7 @@ class MYVar:
         self.type = 0
         self.offet = 0
 
-glvars = {}  #グローバル変数用
+#glvars = {}  #グローバル変数用
 glvars_t = {}
 
 lvars   = {}
@@ -94,6 +99,10 @@ class Token:
         self.kind = 0
         self.val = 0
         self.str = ''
+
+    def myself(self):
+        print('#kind={0:20} val={1:5}, str={2:10}'.format(self.kind, self.val, self.str))
+        return
 
 class Node:
     def __init__(self):
@@ -152,6 +161,15 @@ class NodeFUNCDEF:
         self.para = [] # 引数の変数名を保存する lvars は辞書で実装しているため、順序をもてないので、別に用意する
         self.paranum = 0
         self.param_offset = []
+
+    def myself(self):
+        print('#PRINTFUNC START')
+        print('#name = {0} kind = {1} type = {2} lvars = {3} lvars_t = {4} offset = {5} block = {6} para = {7} paranum = {8} param_offset = {9}'.\
+            format( self.name , self.kind , self.type , self.lvars , self.lvars_t , self.offset , self.block , self.para , self.paranum , self.param_offset ) )
+
+
+
+
 
 class ManncError(Exception) : pass
 
