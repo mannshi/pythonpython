@@ -170,6 +170,7 @@ def funcdef():
             newnode.lvars[ vname ].offset += newnode.lvars[ vname ].type.size 
             
             newnode.offset += newnode.lvars_t[ vname ].size
+            #newnode.offset = newnode.lvarst[ vname ].offset
 
         #del asmd.tkn[0]
 
@@ -514,11 +515,11 @@ def unary():
 
     # アドレス（ポインタ）用演算子
     if consume( '*' ):
-        #print('#ND.DEREF')
+        print('#ND.DEREF')
         node = new_node( ND.DEREF, unary(), 0 )
         return node
     if consume( '&' ):
-        #print('#ND.ADDR')
+        print('#ND.ADDR')
         node = new_node( ND.ADDR, unary(), 0 )
         return node
     

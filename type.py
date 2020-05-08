@@ -75,5 +75,6 @@ def declaration( mode ):
             lastp = base
             return ( arrayt, vname )
     
-    lastp = base
+    lastp.base = base
+
     return ( ptype, vname )

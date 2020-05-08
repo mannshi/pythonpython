@@ -31,11 +31,23 @@ def gen( node ):
         return
     
     if node.kind == ND.DEREF :
+        print('#DEREF START')
         gen( node.lhs )
         print('\tpop rax')
-        print('\tmov rax, [rax]')
-        print('#raxtest 1')
-        print('\tpush rax')
+
+        print('#DEREF {0}'.format( node.lhs.type.base.size ))
+        size = node.lhs.type.base.size
+        if size == 1:
+            print('\tmovsx  rax, byte ptr [rax]')
+            print('\tpush rax')
+        elif size == 4:
+            print('\tmovsxd rax, dword ptr [rax]')
+            print('\tpush rax')
+        else:
+            print('\tmov rax, [rax]')
+            print('\tpush rax')
+
+
         return
 
     if node.kind == ND.FUNCDEF :
@@ -75,6 +87,7 @@ def gen( node ):
             
         #asmd.llvars = node.lvars.copy()
         asmd.lvars = node.lvars.copy()
+        asmd.lvars_t = node.lvars_t.copy()
 
         # 関数本体（ブロック）を出力する
         gen( node.block )
@@ -255,6 +268,7 @@ def gen_lval(node):
 
     if node.kind == ND.LVAR:
         var = node.str
+        
 
         if var in asmd.glvars_t:
             # グローバル変数の左辺値
@@ -264,6 +278,7 @@ def gen_lval(node):
         # グローバル変数でないときにローカル変数とみなす
         print('#here {0}'.format(var))
         offset = asmd.lvars[var].offset
+        #offset = node.offset
         print('#gen_lval var={0} offset={1}'.format(var, offset ) )
 
         print('\tmov rax, rbp')
