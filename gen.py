@@ -2,6 +2,8 @@ import asmd
 import sys
 from asmd import NodeKind as ND
 from asmd import typ as TYP
+import json # json.dumps 用
+import pprint
 
 
 para_reg64 = [ "rdi", "rsi", "rdx", "rcx" ];
@@ -31,7 +33,11 @@ def gen( node ):
         return
     
     if node.kind == ND.DEREF :
-        print('#DEREF START')
+        print('#DEREF START {0}'.format(node))
+        print('#DEREF START {0}'.format(node.kind))
+
+        asmd.pins( node )
+
         gen( node.lhs )
         print('\tpop rax')
 

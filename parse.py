@@ -265,104 +265,23 @@ def stmt():
     # 変数の宣言文の場合    
     if asmd.tkn[0].kind in ( TK.INT, TK.CHAR ):
         tknkind = asmd.tkn[0].kind 
-        # del asmd.tkn[0]
         
-#####
         ( thistype, vname ) =  type.declaration( 'NOTPARA' )
-#####
+        print('#var dec')
+        print('#{0}'.format(vname))
+        thistype.myself()
+        if thistype.base != 0 :
+            thistype.base.myself()
 
-        '''
-        if asmd.tkn[0].kind != TK.IDENT and asmd.tkn[0].str != '*':
-            raise asmd.ManncError('型名の後ろが識別子 でも * でもありません')
-
-        if asmd.tkn[0].kind == TK.IDENT :
-            if asmd.tkn[1].str == '[' :
-                #配列の場合
-                #print('#配列の場合')
-                thistype = asmd.myType()
-                thistype.ty = TYP.ARRAY
-
-                if asmd.tkn[2].kind != TK.NUM:
-                    raise asmd.ManncError('配列の添え字が数字ではありません')
-
-                thistype.array_size = asmd.tkn[2].val
-                #print('#配列の場合 {0}'.format(thistype.array_size))
-                asmd.offset += 8 * asmd.tkn[2].val
-                asmd.llvars[ asmd.tkn[0].str ] = asmd.offset
-                asmd.llvars_t[ asmd.tkn[0].str ] = thistype.ty
-
-                if asmd.tkn[3].str != ']' :
-                    raise asmd.ManncError('配列が ] で閉じられていません')
-
-                del asmd.tkn[0]
-                del asmd.tkn[0]
-                del asmd.tkn[0]
-                del asmd.tkn[0]
-                
-            else :
-                # 配列ではない変数の場合
-                if tknkind == TK.INT:
-                    thistype = asmd.MYType( name = asmd.tkn[0].str, \
-                                            kind = TYP.INT, \
-                                            size = 4, \
-                                            align = 4, \
-                                            array_len = 0, \
-                                            base = 0 )
-                elif tknkind == TK.CHAR:
-                    thistype = asmd.MYType( name = asmd.tkn[0].str, \
-                                            kind = TYP.CHAR, \
-                                            size = 1, \
-                                            align = 1, \
-                                            array_len = 0, \
-                                            base = 0 )
-                else:
-                    thistype = asmd.MYType( name = asmd.tkn[0].str, \
-                                            kind = TYP.PTR, \
-                                            size = 8, \
-                                            align = 8, \
-                                            array_len = 0, \
-                                            base = 0 )
-
-                asmd.lvars_t[ asmd.tkn[0].str ] = thistype
-                asmd.offset = asmd.align_to( asmd.offset, thistype.align )
-                asmd.offset += asmd.lvars_t[ asmd.tkn[0].str ].size
-                asmd.lvars[ asmd.tkn[0].str ] = asmd.MYVar()
-                asmd.lvars[ asmd.tkn[0].str ].offset = asmd.offset
-                #print('#new offset={0}'.format(asmd.lvars[ asmd.tkn[0].str ]) )
-                del asmd.tkn[0]
-        else :
-            # asmd.tkn[0] == '*' の場合
-            del asmd.tkn[0]
-
-            # ポインタ用の領域
-            varname = asmd.tkn[0].str
-            thistype = asmd.MYType( name = varname, kind = TYP.PTR, size = 8, align = 8, array_len = 0, base = 0 )
-
-            if tknkind == TK.INT:
-            # int型へのポインタの場合
-                nexttype = asmd.MYType( name = '', kind = TYP.INT, size = 4, align = 4, array_len = 0, base = 0 )
-            elif tknkind == TK.CHAR:
-                nexttype = asmd.MYType( name = '', kind = TYP.CHAR,size = 1, align = 1, array_len = 0, base = 0 )
-            thistype.base = nexttype
-
-            asmd.offset += 8
-            asmd.lvars[ varname ] = asmd.offset
-            asmd.lvars_t[ varname ] = thistype
-
-            del asmd.tkn[0]
-
-        if not consume( ';' ):
-            raise asmd.ManncError(';ではないトークンです {0}'.format(asmd.tkn[0].str))
-
-        '''
-#######################
-
-        print('#ddd dec {0}'.format( vname ) )
         asmd.lvars_t[ vname ] = thistype
         asmd.offset = asmd.align_to( asmd.offset, thistype.align )
         asmd.offset += asmd.lvars_t[ vname ].size
         asmd.lvars[ vname ] = asmd.MYVar()
         asmd.lvars[ vname ].offset = asmd.offset
+        print('#offset aaaaa')
+        print('#offset  {0}'.format( asmd.offset ) )
+        print('#lvars   {0}'.format( asmd.lvars[ vname ].offset ) )
+        #print('#lvars_t {0}'.format( asmd.lvars_t[ vname ].offset ) )
         #del asmd.tkn[0]
 
         return 0
@@ -506,7 +425,7 @@ def unary():
         newnode = new_node( ND.DEREF, 0, 0 )
         newnode.lhs = new_node( ND.ADD, 0, 0 )
         newnode.lhs.lhs = primary()
-        del asmd.tkn[0] #[
+        del asmd.tkn[0] # [ を削除する
         newnode.lhs.rhs = expr()
         if not consume( ']' ):
             raise asmd.ManncError('配列が]で閉じられていません{0}'.format(asmd.tkn[0].str) )
@@ -543,7 +462,9 @@ def primary():
             del asmd.tkn[0]
             del asmd.tkn[0]
 
+            #
             # 関数呼び出しの場合
+            #
             if consume( ')' ):
                 return newnode
             
@@ -559,7 +480,9 @@ def primary():
             return newnode
 
         else :
+            #
             # 変数（左辺値）の場合
+            #
             if asmd.tkn[0].str in asmd.glvars_t:
                 #グローバル変数として宣言されている場合
                 newnode = asmd.Node()

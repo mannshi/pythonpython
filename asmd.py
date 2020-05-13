@@ -1,6 +1,7 @@
 import sys
 from enum import Enum
 from enum import IntEnum, auto
+import pprint
 
 class TokenKind(Enum):
     RESERVED =  auto()
@@ -177,3 +178,7 @@ class ManncError(Exception) : pass
 # align 以上で、offset で割り切れる最小の値を返す？
 def align_to( offset, align ):
     return ( offset + align -1 ) & ~ ( align -1 )
+
+#インスタンスの中身を出力する（コメント#つき）
+def pins( i ):
+    print( '#' +  pprint.pformat( vars(i), width=1024, compact=True ) )
