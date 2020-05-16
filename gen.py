@@ -3,7 +3,6 @@ import sys
 from asmd import NodeKind as ND
 from asmd import typ as TYP
 import json # json.dumps 用
-import pprint
 
 
 para_reg64 = [ "rdi", "rsi", "rdx", "rcx" ];
@@ -27,33 +26,34 @@ def gen( node ):
         print('\tpush rax')
         return
 
+    # NodeKind が変数の場合
+    if node.kind == ND.LVAR :
+        gen_lval( node )
+        # 配列の場合のみアドレスが指す先をメモリから読み込む処理を飛ばす
+        if node.type != TYP.ARRAY:
+            load( node.size )
+        return 
 
+    # NodeKind が代入の場合
+    if node.kind == ND.ASSIGN :
+        gen_lval( node.lhs )
+        gen( node.rhs )
+        store( node.lhs.size )
+        return
+
+    # Nodekind が '*' の場合
+    if node.kind == ND.DEREF :
+        #asmd.pins( node.lhs )
+        #asmd.pins( node.lhs.lhs )
+        #asmd.pins( node.lhs.rhs )
+        gen( node.lhs )
+        #load( node.lhs.type.size )
+        load( node.lhs.type.base.size )
+        return
+
+    # Nodekind が '&' の場合
     if node.kind == ND.ADDR :
         gen_lval( node.lhs )
-        return
-    
-    if node.kind == ND.DEREF :
-        print('#DEREF START {0}'.format(node))
-        print('#DEREF START {0}'.format(node.kind))
-
-        asmd.pins( node )
-
-        gen( node.lhs )
-        print('\tpop rax')
-
-        print('#DEREF {0}'.format( node.lhs.type.base.size ))
-        size = node.lhs.type.base.size
-        if size == 1:
-            print('\tmovsx  rax, byte ptr [rax]')
-            print('\tpush rax')
-        elif size == 4:
-            print('\tmovsxd rax, dword ptr [rax]')
-            print('\tpush rax')
-        else:
-            print('\tmov rax, [rax]')
-            print('\tpush rax')
-
-
         return
 
     if node.kind == ND.FUNCDEF :
@@ -166,42 +166,6 @@ def gen( node ):
         
         return
 
-    # NodeKind が左辺値の場合
-    if node.kind == ND.LVAR :
-        gen_lval( node )
-        # 配列の場合のみアドレスが指す先をメモリから読み込む処理を飛ばす
-        if node.type != TYP.ARRAY:
-            print('\tpop rax')
-            if node.size == 1:
-                print('\tmovsx rax, byte ptr [rax]')
-            elif node.size == 4:
-                print('\tmovsxd rax, dword ptr[rax]')
-            else:
-                print('\tmov rax, [rax]')
-            print('\tpush rax')
-        return 
-
-    # NodeKind が代入の場合
-    if node.kind == ND.ASSIGN :
-
-        gen_lval( node.lhs )
-        gen( node.rhs )
-
-        print('\tpop rdi')
-        print('\tpop rax')
-
-        # サイズによって使用するレジスタを変える
-        print('#assign size {0}'.format( node.lhs.size ))
-        if node.lhs.size == 1:
-            print('\tmov [rax], dil')
-        elif node.lhs.size == 4:
-            print('\tmov [rax], edi')
-        else:
-            print('\tmov [rax], rdi')
-
-        print('\tpush rdi')
-
-        return
 
     # NodeKind が reurn の場合
     if node.kind == ND.RETURN :
@@ -226,16 +190,13 @@ def gen( node ):
     print('\tpop rdi')
     print('\tpop rax')
     
-    if node.kind == ND.ADD :
+    if node.kind == ND.PTR_ADD :
         #ポインタの計算をする場合
-
-        print('#addddddddddd')
-        print('#add kind {0}'.format(node.lhs.kind))
-
-        if node.lhs.kind == ND.LVAR:
-            print('#add type {0}'.format(node.lhs.type))
-            if node.lhs.type == TYP.PTR :
-                print('\timul rdi, 4')
+        size = node.lhs.type.size
+        print('\timul rdi, 4')
+        print('\tadd rax, rdi')
+        
+    elif node.kind == ND.ADD :
         print('\tadd rax, rdi')
     elif node.kind == ND.SUB :
         print('\tsub rax, rdi')
@@ -271,10 +232,8 @@ def gen( node ):
 
 def gen_lval(node):
 
-
     if node.kind == ND.LVAR:
         var = node.str
-        
 
         if var in asmd.glvars_t:
             # グローバル変数の左辺値
@@ -337,3 +296,29 @@ def gen_strings():
         idx += 1
 
     return
+
+def load( size ):
+    print('\tpop rax');
+    
+    if size == 1:
+        print('\tmovsx rax, byte ptr [rax]')
+    elif size == 4:
+        print('\tmovsxd rax, dword ptr [rax]')
+    else:
+        print('\tmov rax, [rax]')
+    
+    print('\tpush rax');
+
+def store( size ):
+
+    print('\tpop rdi')
+    print('\tpop rax')
+
+    if size == 1:
+        print('\tmov [rax], dil');
+    elif size == 4:
+        print('\tmov [rax], edi');
+    else:
+        print('\tmov [rax], rdi');
+
+    print('\tpush rdi')

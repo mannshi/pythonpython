@@ -94,6 +94,7 @@ class NodeKind(Enum):
     ADDR = auto()
     DEREF = auto()
     STRING = auto()
+    PTR_ADD = auto()
 
 class Token:
     def __init__(self):
@@ -181,4 +182,5 @@ def align_to( offset, align ):
 
 #インスタンスの中身を出力する（コメント#つき）
 def pins( i ):
+    print( '# pins ' ) 
     print( '#' +  pprint.pformat( vars(i), width=1024, compact=True ) )

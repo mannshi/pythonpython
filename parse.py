@@ -127,19 +127,10 @@ def funcdef():
             break;
 ##############
         ( thistype, vname ) =  type.declaration( 'PARA' )
+
         #asmd.glvars_t[ name ] = t
 ##############
 
-        '''
-        if not asmd.tkn[0].kind in [ TK.INT, TK.CHAR ]:
-            raise asmd.ManncError( '関数の引数が型名からはじまりません。' + asmd.tkn[0].kind )
-
-        paratype = asmd.tkn[0].kind
-        del asmd.tkn[0]
-
-        if asmd.tkn[0].kind != TK.IDENT:
-            raise asmd.ManncError('関数パラメータの定義がおかしいです B')
-        '''
         newnode.paranum += 1
 
         #vname = asmd.tkn[0].str
@@ -149,16 +140,6 @@ def funcdef():
            # パラメータの変数名が重複する場合は考慮しない
             pass
         else :
-
-            '''
-            thistype = asmd.myType()
-            if paratype == TK.INT:
-                thistype = asmd.MYType( name = vname, kind = TYP.INT,  size = 4, align = 4, array_len = 0, base = 0 )
-            elif paratype == TK.CHAR:
-                thistype = asmd.MYType( name = vname, kind = TYP.CHAR, size = 1, align = 1, array_len = 0, base = 0 )
-            else :
-                thistype = asmd.MYType( name = vname, kind = TYP.PTR,  size = 4, align = 4, array_len = 0, base = 0 )
-            '''
 
             newnode.lvars_t[ vname ] = thistype
             newnode.para.append( vname )
@@ -199,11 +180,6 @@ def funcdef():
     newnode.offset = asmd.offset
 
     return newnode
-
-
-
-
-
 
 
 
@@ -423,7 +399,8 @@ def unary():
     if asmd.tkn[1].str == '[':
         #配列の場合
         newnode = new_node( ND.DEREF, 0, 0 )
-        newnode.lhs = new_node( ND.ADD, 0, 0 )
+        #newnode.lhs = new_node( ND.ADD, 0, 0 )
+        newnode.lhs = new_node( ND.PTR_ADD, 0, 0 )
         newnode.lhs.lhs = primary()
         del asmd.tkn[0] # [ を削除する
         newnode.lhs.rhs = expr()
@@ -436,6 +413,11 @@ def unary():
     if consume( '*' ):
         print('#ND.DEREF')
         node = new_node( ND.DEREF, unary(), 0 )
+        #node = new_node( ND.DEREF, 0, 0 )
+        #node.lhs = new_node( ND.PTR_ADD, unary(), 0 )
+        #node.type = node.lhs.type
+        #node.lhs.type = node.lhs.type
+        
         return node
     if consume( '&' ):
         print('#ND.ADDR')
@@ -544,6 +526,15 @@ def new_node( kind, lhs, rhs ):
     newnode.lhs = lhs
     newnode.rhs = rhs
 
+    if kind == ND.ADD:
+        newnode.type = asmd.TypeType( TYP.INT,  4, 4, 0, 0, 0)
+    if kind == ND.LVAR:
+        pass
+    if kind == ND.ADDR:
+        newnode.type = asmd.TypeType( TYP.PTR,  8, 8, 0, 0, 0)
+    if kind == ND.DEREF:
+        pass
+    
     return newnode
 
 def new_node_num( val ):
@@ -551,6 +542,7 @@ def new_node_num( val ):
     newnode = asmd.Node()
     newnode.kind = ND.NUM
     newnode.val = val
+    newnode.type = asmd.TypeType( TYP.INT,  4, 4, 0, 0, 0)
 
     return newnode
 
