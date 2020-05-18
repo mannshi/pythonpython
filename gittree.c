@@ -14,7 +14,7 @@ void p_Type( Type *t, int nest );
 #define YELLOW printf("\x1b[33m")
 #define BLACK  printf("\x1b[0m")
 #define RED    printf("\x1b[31m")
-
+#define MAGEN  printf("\x1b[35m")
 /*
 struct Function {
   Function *next;
@@ -67,17 +67,22 @@ int nest
 		RED;
 		printf("function name <%s>\n",next->name );
 		BLACK;
-		printf("params\n");
-		p_VarList( next->params, nest+1 );
-		/* VarList *params; */
 		printf("is_static <%d>\n", next->is_static );
 		printf("has_varargs <%d>\n", next->has_varargs );
-
-		/* Node *node; */
-		/* VarList *locals; */
 		printf("stack_size <%d>\n", next->stack_size);
 
-		//p_VarList( next->locals, nest+1 );
+		MAGEN;
+		printf("params\n");
+		BLACK;
+		p_VarList( next->params, nest+1 );
+		/* VarList *params; */
+		/* Node *node; */
+
+		/* VarList *locals; */
+		MAGEN;
+		printf("locals\n");
+		BLACK;
+		p_VarList( next->locals, nest );
 		next = next->next;
 	}
 
