@@ -1,1 +1,1 @@
-./tree.c
+tree.c
