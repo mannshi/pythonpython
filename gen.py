@@ -48,7 +48,12 @@ def gen( node ):
         #asmd.pins( node.lhs.rhs )
         gen( node.lhs )
         #load( node.lhs.type.size )
-        load( node.lhs.type.base.size )
+        #asmd.pins( node )
+        print('#test001')
+        if node.lhs.type != TYP.ARRAY:
+            print('#test002')
+            load( 4 )
+            #load( node.lhs.type.base.size )
         return
 
     # Nodekind が '&' の場合
@@ -192,7 +197,8 @@ def gen( node ):
     
     if node.kind == ND.PTR_ADD :
         #ポインタの計算をする場合
-        size = node.lhs.type.size
+        #size = node.lhs.type.size
+        node.lhs.type.size = 4
         print('\timul rdi, 4')
         print('\tadd rax, rdi')
         
@@ -231,6 +237,8 @@ def gen( node ):
 #
 
 def gen_lval(node):
+    if node.type == TYP.ARRAY:
+        return
 
     if node.kind == ND.LVAR:
         var = node.str

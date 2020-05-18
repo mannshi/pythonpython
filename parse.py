@@ -399,8 +399,9 @@ def unary():
     if asmd.tkn[1].str == '[':
         #配列の場合
         newnode = new_node( ND.DEREF, 0, 0 )
-        #newnode.lhs = new_node( ND.ADD, 0, 0 )
+        #newnode.type = TYP.ARRAY
         newnode.lhs = new_node( ND.PTR_ADD, 0, 0 )
+        newnode.lhs.type = TYP.ARRAY
         newnode.lhs.lhs = primary()
         del asmd.tkn[0] # [ を削除する
         newnode.lhs.rhs = expr()
