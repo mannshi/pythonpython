@@ -3,6 +3,7 @@ int setid =1;
 int setidType =1;
 int setidVar =1;
 int setidFunction =1;
+int setidNode =1;
 
 
 char Type_tbl[4096] = 
@@ -84,6 +85,7 @@ void ast_varlist( VarList *locals );
 void p_Function( Function *fns, int nest );
 void p_Type( Type *t, int nest );
 void p_Node( Node *N, char *func );
+void p_Node2( Node *N, Node *top, int parent);
 
 #define PS(n) for(int ps=1; ps<=n; ps++ ) printf("|");
 #define pType(t) ( t == TY_VOID ?  "TY_VOID" : ( t == TY_BOOL ?  "TY_BOOL" : ( t == TY_CHAR ?  "TY_CHAR" : ( t == TY_SHORT ?  "TY_SHORT" : ( t == TY_INT ?  "TY_INT" : ( t == TY_LONG ?  "TY_LONG" : ( t == TY_ENUM ?  "TY_ENUM" : ( t == TY_PTR ?  "TY_PTR" : ( t == TY_ARRAY ?  "TY_ARRAY" : ( t == TY_STRUCT ?  "TY_STRUCT" : ( t == TY_FUNC ?  "TY_FUNC" : "TYP_ERROR" )))))))))))
@@ -117,7 +119,9 @@ void ast( Program *prog ) {
   // VarList *globals;
   //
   // Function *fns;
-  printf("digraph G { \nnode [shape=record, fotname=\"Arial\"];\n");
+  printf("digraph G { \n");
+	printf("node [shape=record, fotname=\"Arial\"];\n");
+	printf("graph [ rankdir = TB ];\n");
 
   p_Program( prog );
 
@@ -326,57 +330,61 @@ void p_Node( Node *N, char *func ){
 	char Node_tbl[4096];
 	char tmp[1024];
 
-	sprintf( Node_tbl,
-			"Node_%s [ xlabel = \"%s_node\" label=\"{ADDR|kind|ty|tok|lhs|rhs|var|val}",
-			func,
-			func );
 
 	while( N ) {
-		sprintf( tmp,
-		         "|{%x|%s|%x|%x|%x|%x|%x|%ld}",
-				N,
-				NDKIND[N->kind],
-				N->ty,
-				N->tok,
-				N->lhs,
-				N->rhs,
-				N->var,
-				N->val
-				);
-			
-		switch( N->kind ) {
-		case ND_EXPR_STMT:
-			p_Node_EXPR_STMT( N->lhs, tmp );
+		p_Node2( N, N, 0 );
+		//strcat( Node_tbl, tmp );
 				
-		strcat( Node_tbl, tmp );
 		N = N->next;
 	}
 	
-	strcat( Node_tbl, "\"];\n" );
+	//strcat( Node_tbl, "\"];\n" );
 
 	printf(Node_tbl);
 }
 
-void p_Node2( Node *N, char *tmp ){
 
-	switch( N->kind ) {
-	case ND_EXPR_STMT:
-		sprintf( tmp,
-				 "|{%x|%s|%x|%x|%x|%x|%x|%ld}",
-				N->lhs,
-				NDKIND[N->lhs->kind],
-				N->lhs->ty,
-				N->lhs->tok,
-				N->lhs->lhs,
-				N->lhs->rhs,
-				N->lhs->var,
-				N->lhs->val
-				);
-		break;
-	case ND_ASSIGN:
-		break;
-	default:
+void p_Node2( Node *N, Node *top, int parent ){
+	int myid;
+
+	if( !N ) return;
+
+		printf( "Node_%02d [ xlabel = \"%s_node\" label=\"{top|ADDR|kind|ty|tok|lhs|rhs|var|val}",
+				setidNode, "tmp" );
+
+
+	printf(
+		 "|{%x|%x|%s|%x|%x|%x|%x|%x|%ld}",
+		top,
+		N,
+		NDKIND[N->kind],
+		N->ty,
+		N->tok,
+		N->lhs,
+		N->rhs,
+		N->var,
+		N->val
+		);
+	printf( "\"];\n" );
+	myid = setidNode++;
+
+
+	if( parent != 0 ) {
+		printf( "Node_%02d->Node_%02d;\n", parent, myid );
 	}
+
+	p_Node2( N->lhs, top, myid );
+	p_Node2( N->rhs, top, parent+1 );
+	p_Node2( N->cond, top, parent+1 );
+	p_Node2( N->then, top, parent+1 );
+	p_Node2( N->els, top, parent+1 );
+	p_Node2( N->init, top, parent+1 );
+	p_Node2( N->inc, top, parent+1 );
+	p_Node2( N->body, top, parent+1 );
+	p_Node2( N->args, top, parent+1 );
+	p_Node2( N->case_next, top, parent+1 );
+	p_Node2( N->default_case, top, parent+1 );
+	/**/
 }
 /*
  *
