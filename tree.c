@@ -6,9 +6,13 @@ int setidFunction =1;
 
 
 char Type_tbl[4096] = 
-"setType [ label = \"{kind|size|align|is_incomplete|array_len|members|return_ty|base}";
+"setType [ xlabel = \"TYPE\", label = \"{ADDR|kind|size|align|is_incomplete|array_len|members|return_ty|base}";
 
 char Type_edge[4096] = "";
+
+char Function_tbl[4096];
+
+char VarList_tbl[4096];
 
 char *NDKIND[] = {
 "ND_ADD",
@@ -75,11 +79,11 @@ char *NDKIND[] = {
 void ast( Program * );
 void p_Program( Program *p );
 void p_Var( Var *v, int nest );
-void p_VarList( VarList *locals, int nest );
+void p_VarList( VarList *locals, int nest, char *Fname );
 void ast_varlist( VarList *locals );
 void p_Function( Function *fns, int nest );
 void p_Type( Type *t, int nest );
-void p_Node( Node *N, int next );
+void p_Node( Node *N, char *func );
 
 #define PS(n) for(int ps=1; ps<=n; ps++ ) printf("|");
 #define pType(t) ( t == TY_VOID ?  "TY_VOID" : ( t == TY_BOOL ?  "TY_BOOL" : ( t == TY_CHAR ?  "TY_CHAR" : ( t == TY_SHORT ?  "TY_SHORT" : ( t == TY_INT ?  "TY_INT" : ( t == TY_LONG ?  "TY_LONG" : ( t == TY_ENUM ?  "TY_ENUM" : ( t == TY_PTR ?  "TY_PTR" : ( t == TY_ARRAY ?  "TY_ARRAY" : ( t == TY_STRUCT ?  "TY_STRUCT" : ( t == TY_FUNC ?  "TY_FUNC" : "TYP_ERROR" )))))))))))
@@ -114,7 +118,9 @@ void ast( Program *prog ) {
   //
   // Function *fns;
   printf("digraph G { \nnode [shape=record, fotname=\"Arial\"];\n");
+
   p_Program( prog );
+
   printf("}\n");
 	
 }
@@ -125,11 +131,15 @@ Program *prog)
 	int next = 0;
 	//printf("print globals\n");
 	printf("set%02d [label = \"{globals|functions}\"];\n", setid );
-	p_VarList( prog->globals, 0 );
+
+	p_VarList( prog->globals, 0, "globals" );
+
 	strcat( Type_tbl, "\"];\n" );
 	printf("%s\n", Type_tbl );
 	printf("%s\n", Type_edge );
+
 	p_Function( prog->fns, 0 );
+
 }
 
 void p_Function(
@@ -137,54 +147,74 @@ Function *fns,
 int nest
 )
 {
+	char tmp[1024];
 	Function *next;
 	Function *F;
 	Node *Nnext;
 
 	if( !fns ) return;
 
-	next = fns;
-		printf("setFunction%2d [ label = \"{name|is_static|has_varargs|stack_size}", setidFunction );
 
+	printf("setFunction%02d [ xlabel=\"Function\"label = \"{name|params|is_static|has_varargs|node|locals|stack_size}", setidFunction );
 	F = fns;
-	while( F ) {
-		printf( "|{%s|%d|%x|%d}", F->name, F->is_static, F->has_varargs, F->stack_size );
-		
+	// 関数毎のループ
+	while( F != NULL ) {
+		printf( "|{%s|%x|%d|%d|%x|%x|%d}",
+				F->name,
+				F->params,
+				F->is_static,
+				F->has_varargs,
+				F->node,
+				F->locals,
+				F->stack_size );
+
+/*
+struct Function {
+  Function *next;
+  char *name;
+  VarList *params;
+  bool is_static;
+  bool has_varargs;
+
+  Node *node;
+  VarList *locals;
+  int stack_size;
+};
+*/
+
+		//p_VarList( F->params, 0, F->name );
+
 		F = F->next;
+
 	}
+	// 関数毎のループ 終わり
+	strcat( Function_tbl, tmp );
 
 	setidFunction++;
 	printf(" \"];\n");
 
+	F = fns;
+	// 関数毎のループ パラメータ
+	while( F != NULL ) {
+		p_VarList( F->params, 0, F->name );
+		F = F->next;
+	}
+
+	F = fns;
+	// 関数毎のループ ローカル変数
+	while( F != NULL ) {
+		p_VarList( F->locals, 0, F->name );
+		F = F->next;
+	}
+
+	F = fns;
+	// 関数毎のループ node
+	while( F != NULL ) {
+		p_Node( F->node, F->name  );
+		F = F->next;
+	}
+
 	return;
-/*
-		RED;
-		printf("function name <%s>\n",next->name );
-		BLACK;
-		printf("is_static <%d>", next->is_static );
-		PS( nest +1 )
-		printf("has_varargs <%d>", next->has_varargs );
-		PS( nest +1 )
-		printf("stack_size <%d>\n", next->stack_size);
-
-		MAGEN;
-		printf("params\n");
-		BLACK;
-*/
-		p_VarList( next->params, nest+1 );
-		/* VarList *params; */
-		Nnext = next->node;
-		while( Nnext ) {
-			p_Node( Nnext, nest+1 );
-			Nnext = Nnext->next;
-		}
-		/* VarList *locals; */
-		MAGEN;
-		printf("locals\n");
-		BLACK;
-		p_VarList( next->locals, nest+1 );
-		next = next->next;
-
 }
 
 void p_Var( Var *V, int nest ) {
@@ -212,19 +242,21 @@ struct Var {
   Initializer *initializer;
 };
 */
-void p_VarList( VarList *locals, int nest )
+void p_VarList( VarList *locals, int nest, char *Fname )
 {
 	Var *v;
 	char buff[1024];
 
 	if( !locals ) return;
 
-	printf("setVar%02d [ label = \"{name|ty|is_local|offset|is_static|initializer}", setidVar);
+	printf("setVar%s [ xlabel = \"%s\"label = \"{name|ty|is_local|offset|is_static|initializer}", Fname);
 	while( locals ) {
 		v = locals->var;
 		printf( "|{%s|<%x> %x|%d|%d|%d|%x}",
 				v->name, v->ty, v->ty, v->is_local, v->offset, v->is_static, v->initializer );
 
+		// edge 
+		
 		p_Type( v->ty, 0 );
 		locals = locals->next;
 	}
@@ -241,7 +273,113 @@ struct VarList {
 */
 
 
+
+void p_Type( Type *T, int dummy ) {
+
+	char tmp[1024];
+
+	while( T ) {
+		sprintf( tmp,
+				"|{<TO%x>%x|%s|%d|%d|%d|%d|%x|%x|<FROM%x> %x}",
+				T, T,
+				pType(T->kind),
+				T->size,
+				T->align,
+				T->is_incomplete,
+				T->array_len,
+				T->members,
+				T->return_ty,
+				T->base,
+				T->base
+				);
+		strcat( Type_tbl, tmp );
+
+		if( T->base ) {
+			char tmp[1024];
+			sprintf(tmp, "setType:FROM%x -> setType:TO%x;\n",
+					T->base, T->base);
+			strcat( Type_edge, tmp );
+		}
+
+		//setidType++;
+		T = T->base;
+	}
+
+}
+
 /*
+struct Type {
+  TypeKind kind;
+  int size;           // sizeof() value
+  int align;          // alignment
+  bool is_incomplete; // incomplete type
+
+  Type *base;         // pointer or array
+  int array_len;      // array
+  Member *members;    // struct
+  Type *return_ty;    // function
+};
+*/
+
+void p_Node( Node *N, char *func ){
+
+	char Node_tbl[4096];
+	char tmp[1024];
+
+	sprintf( Node_tbl,
+			"Node_%s [ xlabel = \"%s_node\" label=\"{ADDR|kind|ty|tok|lhs|rhs|var|val}",
+			func,
+			func );
+
+	while( N ) {
+		sprintf( tmp,
+		         "|{%x|%s|%x|%x|%x|%x|%x|%ld}",
+				N,
+				NDKIND[N->kind],
+				N->ty,
+				N->tok,
+				N->lhs,
+				N->rhs,
+				N->var,
+				N->val
+				);
+			
+		switch( N->kind ) {
+		case ND_EXPR_STMT:
+			p_Node_EXPR_STMT( N->lhs, tmp );
+				
+		strcat( Node_tbl, tmp );
+		N = N->next;
+	}
+	
+	strcat( Node_tbl, "\"];\n" );
+
+	printf(Node_tbl);
+}
+
+void p_Node2( Node *N, char *tmp ){
+
+	switch( N->kind ) {
+	case ND_EXPR_STMT:
+		sprintf( tmp,
+				 "|{%x|%s|%x|%x|%x|%x|%x|%ld}",
+				N->lhs,
+				NDKIND[N->lhs->kind],
+				N->lhs->ty,
+				N->lhs->tok,
+				N->lhs->lhs,
+				N->lhs->rhs,
+				N->lhs->var,
+				N->lhs->val
+				);
+		break;
+	case ND_ASSIGN:
+		break;
+	default:
+	}
+}
+/*
+ *
 struct Node {
   NodeKind kind; // Node kind
   Node *next;    // Next node
@@ -284,88 +422,3 @@ struct Node {
   long val;
 };
 */
-
-void p_Type( Type *T, int dummy ) {
-
-	char tmp[1024];
-
-	while( T ) {
-		sprintf( tmp,
-				"|{<TO%x> %s|%d|%d|%d|%d|%x|%x|<FROM%x> %x}",
-				T,
-				pType(T->kind),
-				T->size,
-				T->align,
-				T->is_incomplete,
-				T->array_len,
-				T->members,
-				T->return_ty,
-				T->base,
-				T->base
-				);
-		strcat( Type_tbl, tmp );
-
-		if( T->base ) {
-			char tmp[1024];
-			sprintf(tmp, "setType%02d:FROM%x -> setType%02d:TO%x;\n",
-					setidType, T->base, setidType, T->base);
-			strcat( Type_edge, tmp );
-		}
-
-		//setidType++;
-		T = T->base;
-	}
-
-}
-
-/*
-struct Type {
-  TypeKind kind;
-  int size;           // sizeof() value
-  int align;          // alignment
-  bool is_incomplete; // incomplete type
-
-  Type *base;         // pointer or array
-  int array_len;      // array
-  Member *members;    // struct
-  Type *return_ty;    // function
-};
-*/
-
-void p_Node( Node *N, int nest ){
-	if( !N ) { return; }
-	PS(nest);RED; printf("p_Node\n"); BLACK;
-
-	PS(nest);printf("<kind>=%s, %d\n",NDKIND[ N->kind ], N->kind );
-//  Node  printf("<next>=%d\n",N->next);
-	//p_Node( N->next,nest+1 );
-//  Type  printf("<ty>=%d\n",N->ty);
-	p_Type( N->ty, nest+1 );
-//  Token  printf("<tok>=%d\n",N->tok);
-//  Node  printf("<lhs>=%d\n",N->lhs);
-    if( N->lhs ) {
-		PS( nest );printf("lhs\n");
-		p_Node( N->lhs, nest+1 );
-	}
-//  Node  printf("<rhs>=%d\n",N->rhs);
-    if( N->rhs ) {
-		PS( nest );printf("rhs\n");
-		p_Node( N->rhs, nest+1 );
-	}
-//  Node  printf("<cond>=%d\n",N->cond);
-//  Node  printf("<then>=%d\n",N->then);
-//  Node  printf("<els>=%d\n",N->els);
-//  Node  printf("<init>=%d\n",N->init);
-//  Node  printf("<inc>=%d\n",N->inc);
-//  Node  printf("<body>=%d\n",N->body);
-//  Member  printf("<member>=%d\n",N->member);
-	PS( nest ); printf("<funcname>=%s\n",N->funcname);
-//  Node  printf("<args>=%d\n",N->args);
-	PS( nest ); printf("<label_name>=%s\n",N->label_name);
-//  Node  printf("<case_next>=%d\n",N->case_next);
-//  Node  printf("<default_case>=%d\n",N->default_case);
-	PS( nest ); printf("<case_label>=%d\n",N->case_label);
-	PS( nest ); printf("<case_end_label>=%d\n",N->case_end_label);
-//  Var  printf("<var>=%d\n",N->var);
-	PS( nest ); printf("<val>=%l\n",N->val);
-}
