@@ -6,8 +6,9 @@ int setidFunction =1;
 int setidNode =1;
 
 
-char Type_tbl[4096] = 
+char Type_tbl0[4096] = 
 "setType [ xlabel = \"TYPE\", label = \"{ADDR|kind|size|align|is_incomplete|array_len|members|return_ty|base}";
+char Type_tbl[4096];
 
 char Type_edge[4096] = "";
 
@@ -84,6 +85,7 @@ void p_VarList( VarList *locals, int nest, char *Fname );
 void ast_varlist( VarList *locals );
 void p_Function( Function *fns, int nest );
 void p_Type( Type *t, int nest );
+void p_Type2( Type *t, int nest );
 void p_Node( Node *N, char *func );
 void p_Node2( Node *N, Node *top, int parent);
 
@@ -134,15 +136,16 @@ Program *prog)
 {
 	int next = 0;
 	//printf("print globals\n");
+	strcpy( Type_tbl, Type_tbl0 );
 	printf("set%02d [label = \"{globals|functions}\"];\n", setid );
 
 	p_VarList( prog->globals, 0, "globals" );
 
+
+	p_Function( prog->fns, 0 );
 	strcat( Type_tbl, "\"];\n" );
 	printf("%s\n", Type_tbl );
 	printf("%s\n", Type_edge );
-
-	p_Function( prog->fns, 0 );
 
 }
 
@@ -298,16 +301,55 @@ void p_Type( Type *T, int dummy ) {
 				);
 		strcat( Type_tbl, tmp );
 
+/*
 		if( T->base ) {
 			char tmp[1024];
 			sprintf(tmp, "setType:FROM%x -> setType:TO%x;\n",
 					T->base, T->base);
 			strcat( Type_edge, tmp );
 		}
+*/
 
 		//setidType++;
 		T = T->base;
 	}
+
+}
+
+void p_Type2( Type *T, int dummy ) {
+
+	char Type_tbl2[4096] = 
+	"setType%x [ xlabel = \"TYPE\", label = \"{ADDR|kind|size|align|is_incomplete|array_len|members|return_ty|base}";
+
+	char tmp[1024];
+
+	if( !T ) return;
+
+	sprintf( Type_tbl2,
+			"setType%x [ xlabel = \"TYPE\", label = \"{ADDR|kind|size|align|is_incomplete|array_len|members|return_ty|base}",
+			T );
+
+	while( T ) {
+		sprintf( tmp,
+				"|{<TO%x>%x|%s|%d|%d|%d|%d|%x|%x|<FROM%x> %x}",
+				T, T,
+				pType(T->kind),
+				T->size,
+				T->align,
+				T->is_incomplete,
+				T->array_len,
+				T->members,
+				T->return_ty,
+				T->base,
+				T->base
+				);
+		strcat( Type_tbl2, tmp );
+
+		T = T->base;
+	}
+
+	strcat( Type_tbl2, "\"];\n" );
+	printf("%s", Type_tbl2 );
 
 }
 
@@ -349,7 +391,7 @@ void p_Node2( Node *N, Node *top, int parent ){
 
 	if( !N ) return;
 
-		printf( "Node_%02d [ xlabel = \"%s_node\" label=\"{top|ADDR|kind|ty|tok|lhs|rhs|var|val}",
+		printf( "Node_%02d [ colorscheme=\"rdylgn11\", color=7,  xlabel = \"%s_node\" label=\"{top|ADDR|kind|ty|tok|lhs|rhs|var|val}",
 				setidNode, "tmp" );
 
 
@@ -369,9 +411,15 @@ void p_Node2( Node *N, Node *top, int parent ){
 	myid = setidNode++;
 
 
+	p_Type2( N->ty, 1 );
+	if( N->ty )
+		printf("Node_%02d -> setType%x [style = dotted];\n",
+				setidNode-1, N->ty );
+
 	if( parent != 0 ) {
 		printf( "Node_%02d->Node_%02d;\n", parent, myid );
 	}
+
 
 	p_Node2( N->lhs, top, myid );
 	p_Node2( N->rhs, top, parent+1 );
