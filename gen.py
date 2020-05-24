@@ -3,6 +3,8 @@ import sys
 from asmd import NodeKind as ND
 from asmd import typ as TYP
 import json # json.dumps 用
+import inspect
+import os
 
 
 para_reg64 = [ "rdi", "rsi", "rdx", "rcx" ];
@@ -16,6 +18,9 @@ if_num = 0
 def gen( node ):
     global if_num
     
+    print("# gen START")
+    asmd.pins( node )
+
     if node == 0:
         return
 
@@ -28,14 +33,23 @@ def gen( node ):
 
     # NodeKind が変数の場合
     if node.kind == ND.LVAR :
+        print("#in {0}(): if node.kind == {1}".format(inspect.currentframe().f_back.f_code.co_name, node.kind) )
         gen_lval( node )
         # 配列の場合のみアドレスが指す先をメモリから読み込む処理を飛ばす
-        if node.type != TYP.ARRAY:
+        if node.type.kind != TYP.ARRAY:
             load( node.size )
         return 
 
     # NodeKind が代入の場合
     if node.kind == ND.ASSIGN :
+        print("#in {0}:{1}".format(os.path.basename(inspect.currentframe().f_back.f_code.co_filename),  inspect.currentframe().f_back.f_lineno) )
+        #asmd.pins( node.lhs ) 
+        #asmd.pins( node.lhs.lhs ) if node.lhs != 0 else 0
+        #asmd.pins( node.lhs.lhs.lhs ) if node.lhs.lhs !=0 else 0
+        #asmd.pins( node.lhs.lhs.lhs.type ) if node.lhs.lhs !=0 else 0
+        #asmd.pins( node.lhs.lhs.lhs.type.base ) if node.lhs.lhs !=0 else 0
+        #asmd.pins( node.lhs.lhs.rhs ) if node.lhs.lhs !=0 else 0
+        #asmd.pins( node.lhs.lhs.rhs.type ) if node.lhs.lhs !=0 else 0
         gen_lval( node.lhs )
         gen( node.rhs )
         store( node.lhs.size )
@@ -43,21 +57,24 @@ def gen( node ):
 
     # Nodekind が '*' の場合
     if node.kind == ND.DEREF :
-        #asmd.pins( node.lhs )
-        #asmd.pins( node.lhs.lhs )
-        #asmd.pins( node.lhs.rhs )
+        print('#test001')
+        asmd.pins( node )
+        asmd.pins( node.lhs )
+        asmd.pins( node.lhs.lhs )
+        asmd.pins( node.lhs.rhs )
         gen( node.lhs )
         #load( node.lhs.type.size )
         #asmd.pins( node )
-        print('#test001')
         if node.lhs.type != TYP.ARRAY:
+            print("#in {0}:{1}".format(os.path.basename(inspect.currentframe().f_back.f_code.co_filename),  inspect.currentframe().f_back.f_lineno) )
             print('#test002')
-            load( 4 )
-            #load( node.lhs.type.base.size )
+            #load( 4 )
+            load( node.lhs.type.base.size )
         return
 
     # Nodekind が '&' の場合
     if node.kind == ND.ADDR :
+        print("# gen ND.ADDRF")
         gen_lval( node.lhs )
         return
 
@@ -139,6 +156,7 @@ def gen( node ):
     # NodeKindが、数値の場合
     # スタックにその値をプッシュする
     if node.kind == ND.NUM :
+        print("#in {0}(): if node.kind == {1}".format(inspect.currentframe().f_back.f_code.co_name, node.kind) )
         print( '\tpush {0}'.format( node.val ) )
         return
 
@@ -189,6 +207,7 @@ def gen( node ):
     # pop してその二つを rdi と rax に入れる
     # 演算の結果は rax に入れてプッシュする
     
+    print("#in {0}:{1}".format(os.path.basename(inspect.currentframe().f_back.f_code.co_filename),  inspect.currentframe().f_back.f_lineno) )
     gen( node.lhs )
     gen( node.rhs )
 
@@ -196,6 +215,8 @@ def gen( node ):
     print('\tpop rax')
     
     if node.kind == ND.PTR_ADD :
+        print("#in {0}:{1}".format(os.path.basename(inspect.currentframe().f_back.f_code.co_filename),  inspect.currentframe().f_back.f_lineno) )
+        print("# gen ND.PTR_ADDR")
         #ポインタの計算をする場合
         #size = node.lhs.type.size
         node.lhs.type.size = 4
@@ -237,10 +258,17 @@ def gen( node ):
 #
 
 def gen_lval(node):
+    print("# gen_lval START")
+    asmd.pins( node )
+
+    print("#in {0}(): if node.kind == {1}".format(inspect.currentframe().f_back.f_code.co_name, node.kind) )
+
     if node.type == TYP.ARRAY:
+        print("#in {0}(): if node.kind == {1}".format(inspect.currentframe().f_back.f_code.co_name, node.kind) )
         return
 
     if node.kind == ND.LVAR:
+        print("#in {0}(): if node.kind == {1}".format(inspect.currentframe().f_back.f_code.co_name, node.kind) )
         var = node.str
 
         if var in asmd.glvars_t:
@@ -262,6 +290,7 @@ def gen_lval(node):
         return 
 
     if node.kind == ND.DEREF:
+        print("#in {0}(): if node.kind == {1}".format(inspect.currentframe().f_back.f_code.co_name, node.kind) )
         gen( node.lhs )
         return 
 

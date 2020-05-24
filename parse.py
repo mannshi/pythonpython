@@ -291,7 +291,9 @@ def stmt():
 #
 def expr():
     #print("# expr")
-    return assign()
+    n = assign()
+    add_type( n )
+    return n
 
 #
 # assign = equality ("=" assign)?
@@ -401,8 +403,8 @@ def unary():
         newnode = new_node( ND.DEREF, 0, 0 )
         #newnode.type = TYP.ARRAY
         newnode.lhs = new_node( ND.PTR_ADD, 0, 0 )
-        newnode.lhs.type = TYP.ARRAY
         newnode.lhs.lhs = primary()
+        newnode.lhs.type = newnode.lhs.lhs.type
         del asmd.tkn[0] # [ を削除する
         newnode.lhs.rhs = expr()
         if not consume( ']' ):
@@ -414,6 +416,7 @@ def unary():
     if consume( '*' ):
         print('#ND.DEREF')
         node = new_node( ND.DEREF, unary(), 0 )
+        node.type = node.lhs.type
         #node = new_node( ND.DEREF, 0, 0 )
         #node.lhs = new_node( ND.PTR_ADD, unary(), 0 )
         #node.type = node.lhs.type
@@ -472,6 +475,7 @@ def primary():
                 newnode.kind = ND.LVAR
                 newnode.str = asmd.tkn[0].str
                 newnode.size = asmd.glvars_t[ asmd.tkn[0].str ].size
+                newnode.type = asmd.glvars_t[ asmd.tkn[0].str ]
                 del asmd.tkn[0]
                 return newnode
 
@@ -629,3 +633,26 @@ def set_type( ty, size, align, ptr_to, array_size ):
         #newtype.array_size = array_size; # 配列の要素数（バイト数ではない？）
     
         return newtype
+
+def add_type( node ) :
+    if node == 0:
+        return
+    print('#add_type {0}'.format(node.kind) )
+    if node.kind == ND.FUNC:
+        return
+
+    add_type( node.lhs )
+    add_type( node.rhs )
+    
+    if node.kind == ND.PTR_ADD or \
+       node.kind == ND.ASSIGN :
+        node.type = node.lhs.type
+        #node.size = node.lhs.type.size
+        return
+    elif node.kind == ND.DEREF :
+        print('#deref add_type')
+        node.type = node.lhs.type.base
+        node.size = node.lhs.type.base.size
+        print('#deref add_type {0}'.format( node.type ))
+        return
+

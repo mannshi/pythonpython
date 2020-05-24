@@ -2,6 +2,7 @@ import sys
 from enum import Enum
 from enum import IntEnum, auto
 import pprint
+import inspect
 
 class TokenKind(Enum):
     RESERVED =  auto()
@@ -183,4 +184,4 @@ def align_to( offset, align ):
 #インスタンスの中身を出力する（コメント#つき）
 def pins( i ):
     print( '# pins ' ) 
-    print( '#' +  pprint.pformat( vars(i), width=1024, compact=True ) )
+    print( '#' +  pprint.pformat( vars(i), width=1024, compact=True ) ) if i!=0 else print('# null')
