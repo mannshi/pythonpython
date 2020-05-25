@@ -416,11 +416,16 @@ def unary():
     if consume( '*' ):
         print('#ND.DEREF')
         node = new_node( ND.DEREF, unary(), 0 )
+        if node.lhs.kind == ND.ADD:
+            node.lhs.kind = ND.PTR_ADD
         node.type = node.lhs.type
         #node = new_node( ND.DEREF, 0, 0 )
         #node.lhs = new_node( ND.PTR_ADD, unary(), 0 )
         #node.type = node.lhs.type
         #node.lhs.type = node.lhs.type
+        print("#DEREF pins" )
+        asmd.pins( node )
+        asmd.pins( node.lhs )
         
         return node
     if consume( '&' ):
@@ -640,7 +645,7 @@ def add_type( node ) :
     print('#add_type {0}'.format(node.kind) )
     if node.kind == ND.FUNC:
         return
-
+        
     add_type( node.lhs )
     add_type( node.rhs )
     
@@ -652,6 +657,8 @@ def add_type( node ) :
     elif node.kind == ND.DEREF :
         print('#deref add_type')
         node.type = node.lhs.type.base
+        print('#add_type')
+        asmd.pins( node.lhs.type )
         node.size = node.lhs.type.base.size
         print('#deref add_type {0}'.format( node.type ))
         return

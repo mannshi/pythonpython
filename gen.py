@@ -42,7 +42,8 @@ def gen( node ):
 
     # NodeKind が代入の場合
     if node.kind == ND.ASSIGN :
-        print("#in {0}:{1}".format(os.path.basename(inspect.currentframe().f_back.f_code.co_filename),  inspect.currentframe().f_back.f_lineno) )
+        #print("#assign")
+        #print("#in {0}:{1}".format(os.path.basename(inspect.currentframe().f_back.f_code.co_filename),  inspect.currentframe().f_back.f_lineno) )
         #asmd.pins( node.lhs ) 
         #asmd.pins( node.lhs.lhs ) if node.lhs != 0 else 0
         #asmd.pins( node.lhs.lhs.lhs ) if node.lhs.lhs !=0 else 0
