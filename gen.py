@@ -113,7 +113,6 @@ def gen( node ):
             
             para_i += 1
             
-        #asmd.llvars = node.lvars.copy()
         asmd.lvars = node.lvars.copy()
         asmd.lvars_t = node.lvars_t.copy()
 
@@ -279,7 +278,6 @@ def gen_lval(node):
         # グローバル変数でないときにローカル変数とみなす
         print('#here {0}'.format(var))
         offset = asmd.lvars[var].offset
-        #offset = node.offset
         print('#gen_lval var={0} offset={1}'.format(var, offset ) )
 
         print('\tmov rax, rbp')

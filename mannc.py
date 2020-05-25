@@ -24,7 +24,6 @@ def mannc( filename ):
     #
     # パース
     #
-    asmd.llvars = {}
     asmd.offset = 0
     parse.program()
 
@@ -34,8 +33,6 @@ def mannc( filename ):
         asmd.glvars_t[ g ].myself()
     print('#PRINT glvars_t END')
 
-    print('#llvars {0}'.format(asmd.llvars))
-    print('#llvars_t {0}'.format(asmd.llvars_t))
     print('#offset {0}'.format(asmd.offset))
 
     #

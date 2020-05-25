@@ -102,9 +102,9 @@ def funcdef():
     newnode = asmd.NodeFUNCDEF()
 
     if asmd.tkn[0].kind == TK.INT:
-        newnode.type = asmd.MYType( name = asmd.tkn[0].str, kind = TYP.INT,  size = 4, align = 4, array_len = 0, base = 0 )
+        newnode.type = asmd.TypeType( kind = TYP.INT,  size = 4, align = 4, array_len = 0, base = 0, function = 0 )
     elif asmd.tkn[0].kind == TK.CHAR:
-        newnode.type = asmd.MYType( name = asmd.tkn[0].str, kind = TYP.CHAR, size = 1, align = 1, array_len = 0, base = 0 )
+        newnode.type = asmd.TypeType( kind = TYP.CHAR, size = 1, align = 1, array_len = 0, base = 0, function = 0 )
     else:
         raise asmd.ManncError( '関数の定義が型名からはじまりません。' )
     del asmd.tkn[0]

@@ -19,12 +19,6 @@ class TokenKind(Enum):
     SIZEOF   =  auto()
     STRING   =  auto()
 
-tk_reserved_list = [ '+' , '-' , '*' , '/' , '(' , ')',
-                     '==', '!=', '>', '>=', '<', '<=',
-                     '=',
-                     ';'
-                   ]
-
 tkn = []
 code = []
 
@@ -39,23 +33,10 @@ class TypeType:
     def myself(self):
         print('#kind={0} size={1} align={2} array_len={3} base={4}'.format(self.kind, self.size, self.align, self.array_len, self.base))
 
-
-class MYType:
-    def __init__(self, kind, name, size, align, array_len, base):
-        self.kind = kind
-        self.name = name
-        self.size = size
-        self.align = align
-        self.array_len = array_len
-        self.base = base
-    def myself(self):
-        print('#kind={:                                        0} name={1}, size={2} align={3} array_len={4} base={5}'.format(self.kind, self.name, self.size, self.align, self.array_len, self.base))
-        return
-    
 class MYVar:
     def __init__( self ):
-        self.name = 0
-        self.type = 0
+        #ref self.name = 0
+        #self.type = 0
         self.offet = 0
 
 #glvars = {}  #グローバル変数用
@@ -63,10 +44,6 @@ glvars_t = {}
 
 lvars   = {}
 lvars_t = {}
-
-llvars = {}  #スコープ（関数）毎にこの変数に代入する
-llvars_t = {} 
-llvars_s = {} 
 
 offset = 0
 
