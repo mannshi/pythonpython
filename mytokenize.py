@@ -152,12 +152,14 @@ def mytokenize(fname):
             chb = f.read(1)
             ch = chb.decode('utf-8')
 
+        #string_i 文字列の通し番号
+        label = ".L.LITERAL.{0}".format( asmd.string_i )
+        asmd.strings[ label ] = tmpstr
+        asmd.strings_i += 1
+
         newtkn = asmd.Token()
-        asmd.strings.append( tmpstr )
-
         newtkn.kind = TK.STRING
-        newtkn.val = len ( asmd.strings ) -1
-
+        newtkn.str = label # 変数名＝ラベル
         asmd.tkn.append( newtkn )
 
         # ダブルクォーテーションを読み捨てる

@@ -22,6 +22,9 @@ class TokenKind(Enum):
 tkn = []
 code = []
 
+strings = [] #文字列を格納する配列
+strings_i  = 0 #カウンタ
+
 class TypeType:
     def __init__(self, kind, size, align, array_len, base, function):
         self.kind = kind
@@ -49,7 +52,8 @@ offset = 0
 
 functions = []
 
-strings = []
+strings = {} 
+string_i = 0
 
 class NodeKind(Enum):
     ADD   = auto()
@@ -79,6 +83,7 @@ class Token:
         self.kind = 0
         self.val = 0
         self.str = ''
+        self.strid = 0
 
     def myself(self):
         print('#kind={0:20} val={1:5}, str={2:10}'.format(self.kind, self.val, self.str))

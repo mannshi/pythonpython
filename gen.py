@@ -19,7 +19,7 @@ def gen( node ):
     global if_num
     
     print("# gen START")
-    asmd.pins( node )
+    #asmd.pins( node )
 
     if node == 0:
         return
@@ -59,10 +59,10 @@ def gen( node ):
     # Nodekind が '*' の場合
     if node.kind == ND.DEREF :
         print('#test001')
-        asmd.pins( node )
-        asmd.pins( node.lhs )
-        asmd.pins( node.lhs.lhs )
-        asmd.pins( node.lhs.rhs )
+        #asmd.pins( node )
+        #asmd.pins( node.lhs )
+        #asmd.pins( node.lhs.lhs )
+        #asmd.pins( node.lhs.rhs )
         gen( node.lhs )
         #load( node.lhs.type.size )
         #asmd.pins( node )
@@ -219,8 +219,8 @@ def gen( node ):
         print("# gen ND.PTR_ADDR")
         #ポインタの計算をする場合
         #size = node.lhs.type.size
-        node.lhs.type.size = 4
-        print('\timul rdi, 4')
+        #node.lhs.type.size = 4
+        print('\timul rdi, {0}'.format(node.lhs.type.base.size))
         print('\tadd rax, rdi')
         
     elif node.kind == ND.ADD :
@@ -259,7 +259,7 @@ def gen( node ):
 
 def gen_lval(node):
     print("# gen_lval START")
-    asmd.pins( node )
+    #asmd.pins( node )
 
     print("#in {0}(): if node.kind == {1}".format(inspect.currentframe().f_back.f_code.co_name, node.kind) )
 
@@ -299,15 +299,17 @@ def gen_gvar():
     #if len( asmd.glvars_t ) == 0:
         #return
 
-    # 初期化しないグローバル変数を出力する
+    # 初期化しないグローバル変数を出力する（文字列は除く）
     for gv in asmd.glvars_t:
-        print('.global {0}'.format(gv) )
+        if not gv.startswith( '.L.LITERAL' ) :
+            print('.global {0}'.format(gv) )
 
     print('.bss')
     for gv in asmd.glvars_t.keys():
-        print('.align {0}'.format(asmd.glvars_t[gv].align) )
-        print('{0}:'.format( gv ) )
-        print('\t.zero {0}'.format(asmd.glvars_t[gv].size) )
+        if not gv.startswith( '.L.LITERAL' ) :
+            print('.align {0}'.format(asmd.glvars_t[gv].align) )
+            print('{0}:'.format( gv ) )
+            print('\t.zero {0}'.format(asmd.glvars_t[gv].size) )
         #print('\t.zero 4' )
 
     print('.data')
@@ -322,11 +324,14 @@ def gen_gvar():
 def gen_strings():
     idx = 0
     for string in asmd.strings:
+        print('#string {0}'.format( string ) )
         print('.align 1')
-        print('.L.strings.{0}:'.format(idx))
+        print('{0}:'.format(string))
         chi = 0
-        while chi < len(string):
-            print('\t.byte {0}'.format(ord(string[chi])))
+        c = asmd.strings[string]
+        while chi < len(c):
+            #print('\t.byte {0}'.format(ord(c[chi])))
+            print('\t.byte {0}'.format(ord(c[chi])))
             chi +=1
         print('\t.byte 0')
         idx += 1

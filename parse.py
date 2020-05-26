@@ -500,10 +500,21 @@ def primary():
             return newnode
 
     if asmd.tkn[0].kind == TK.STRING :
+        # 文字リテラルはグローバル変数として扱う
+        # .dataセグメントに書き込む？
+        # ラベル名＝変数名になる
         #print('#parse string')
         newnode = asmd.Node()
-        newnode.kind = ND.STRING
-        newnode.val = asmd.tkn[0].val
+        newnode.kind = ND.LVAR
+        newnode.str = asmd.tkn[0].str
+        newnode.size = len( asmd.tkn[0].str )
+        newnode.type = asmd.TypeType( TYP.ARRAY,
+                                        newnode.size+1,
+                                        1,
+                                        newnode.size + 1,
+                                        asmd.TypeType( TYP.INT,  4, 4, 0, 0, 0),
+                                        0)
+        asmd.glvars_t[ newnode.str ] = newnode.type
 
         del asmd.tkn[0]
         return newnode
