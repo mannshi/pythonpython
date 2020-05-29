@@ -16,6 +16,9 @@ char Function_tbl[4096];
 
 char VarList_tbl[4096];
 
+char Initializer_tbl[4096] = 
+"setInitializer [ xlabel= \"Initializer\" label=\"{ADDR|next|sz|val|label|addend}";
+
 char *NDKIND[] = {
 "ND_ADD",
 "ND_PTR_ADD",
@@ -147,6 +150,8 @@ Program *prog)
 	printf("%s\n", Type_tbl );
 	printf("%s\n", Type_edge );
 
+	strcat( Initializer_tbl, "\"];\n" );
+	printf("%s\n", Initializer_tbl );
 }
 
 void p_Function(
@@ -249,6 +254,31 @@ struct Var {
   Initializer *initializer;
 };
 */
+void p_Initializer( Initializer *in ) {
+	char tmp[1024];
+
+	while( in ) {
+		sprintf(tmp,
+				"|{%x|%x|%d|%d|%s|%d}",
+				in, in->next, in->sz, in->val, in->label, in->addend );
+		strcat( Initializer_tbl, tmp );
+		in = in->next;
+	}
+}
+/*
+struct Initializer {
+  Initializer *next;
+
+  // Constant expression
+  int sz;
+  long val;
+
+  // Reference to another global variable
+  char *label;
+  long addend;
+};
+*/
+
 void p_VarList( VarList *locals, int nest, char *Fname )
 {
 	Var *v;
@@ -263,6 +293,7 @@ void p_VarList( VarList *locals, int nest, char *Fname )
 				v->name, v->ty, v->ty, v->is_local, v->offset, v->is_static, v->initializer );
 
 		// edge 
+		p_Initializer( v->initializer );
 		
 		p_Type( v->ty, 0 );
 		locals = locals->next;
