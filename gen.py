@@ -12,10 +12,13 @@ para_reg32 = [ "edi", "esi", "edx", "ecx" ];
 para_reg8  = [ "dil", "sil", "dl",  "cl" ];
 
 if_num = 0
+
+seq = 0
 #
 # コード生成
 #
 def gen( node ):
+    global seq
     global if_num
     
     print("# gen START")
@@ -147,7 +150,24 @@ def gen( node ):
                 raise asmd.ManncError('関数の引数は４つまで')
                 #sys.exit()
             pcnt += 1
+
+        print("  mov rax, rsp");
+        print("  and rax, 15");
+        print("  jnz .L.call.{0}".format(seq));
+        print("  mov rax, 0");
+        #print("  call %s\n", node->funcname);
         print('\tcall {0}'.format(node.name) )
+        print("  jmp .L.end.{0}".format(seq));
+        print(".L.call.{0}:".format(seq));
+        print("  sub rsp, 8");
+        print("  mov rax, 0");
+        #print("  call %s\n", node->funcname);
+        print('\tcall {0}'.format(node.name) )
+        print("  add rsp, 8");
+        print(".L.end.{0}:".format(seq));
+        seq += 1
+
+        #print('\tcall {0}'.format(node.name) )
         print('#raxtest 2')
         print('\tpush rax')
         
