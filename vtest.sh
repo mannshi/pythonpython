@@ -14,10 +14,11 @@ answer[11]=5
 answer[12]=6
 answer[13]=9
 answer[14]=101
-answer[15]=101
+answer[15]=195
 answer[16]=101
+answer[17]=100
 
-for n in {1..16};do
+for n in {1..17};do
     num=`printf "%02d" $n`
 	tdir=v
     ifile=$tdir/$num.c

@@ -166,6 +166,49 @@ def mytokenize(fname):
         offset += 1
         chb = f.read(1)
 
+    def tk_comment():
+        nonlocal ch
+        nonlocal offset
+        
+        # 次の一文字を読む
+        f.seek( offset )
+        chb = f.read(1)
+        ch = chb.decode('utf-8')
+        offset += 1
+        if ch == '/': # '//' 行コメントの場合
+            while True:
+                f.seek( offset )
+                chb = f.read(1)
+                ch = chb.decode('utf-8')
+                offset += 1
+
+                if ch == '\n' :
+                    offset -= 1
+                    return
+                
+        elif ch == '*': # '/*' ブロックコメントの場合
+            while True:
+                f.seek( offset )
+                chb = f.read(1)
+                ch = chb.decode('utf-8')
+                offset += 1
+
+                if ch == '*':
+                    # '*/' かどうかを調べる
+                    f.seek( offset )
+                    chb = f.read(1)
+                    ch = chb.decode('utf-8')
+                    offset += 1
+                    if ch == '/':
+                        return
+
+        else:
+            #その他（割り算）の場合
+            newtkn = asmd.Token()
+            newtkn.kind = TK.RESERVED
+            newtkn.str = '/'
+            asmd.tkn.append( newtkn )
+            offset -= 1
 
     #
     # 関数内関数 おわり
@@ -188,7 +231,7 @@ def mytokenize(fname):
             if ch == '\n' or ch == ' ' : continue
 
             # 一文字のトークン の場合
-            if ch == ';' or ch == '+' or ch == '-' or ch == '*' or ch == '/' or \
+            if ch == ';' or ch == '+' or ch == '-' or ch == '*' or \
                ch == '(' or ch == ')' or ch == '{' or ch == '}' or \
                ch == ',' or ch == '&' or ch == '[' or ch == ']' :
                 newtkn = asmd.Token()
@@ -196,6 +239,9 @@ def mytokenize(fname):
                 newtkn.str = ch
                 asmd.tkn.append( newtkn )
                 continue
+
+            # '/' の場合（ブロックコメント、一行コメント、割り算）
+            if ch == '/': tk_comment(); continue
 
             # '=' または '==' の場合
             if ch == '=': tk_equal(); continue
