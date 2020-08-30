@@ -188,7 +188,7 @@ def mytokenize(fname):
         #string_i 文字列の通し番号
         label = ".L.LITERAL.{0}".format( asmd.string_i )
         asmd.strings[ label ] = tmpstr
-        asmd.strings_i += 1
+        asmd.string_i += 1
 
         newtkn = asmd.Token()
         newtkn.kind = TK.STRING
