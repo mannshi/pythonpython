@@ -149,7 +149,6 @@ def mytokenize(fname):
 
             #文字列中のバックスペースはエスケープシーケンス
             if ch == '\\':
-                
                 offset += 1
                 f.seek( offset )
                 chb = f.read(1)
@@ -158,8 +157,26 @@ def mytokenize(fname):
                 if ch == 'n' : # 改行文字
                     ch = "\n"
 
-                if ch == '0' : # '/nnn は８進数のコード
-                    pass
+                if ch.isdecimal() : # '\nnn は８進数のコード
+                    cnt8 = 1
+                    num8 = 0
+                    while ch.isdecimal() and cnt8 <= 3:
+                        if 0 <= int( ch ) <= 7 :
+
+                            num8 *= 8
+                            num8 += int( ch )
+
+                            offset += 1
+                            f.seek( offset )
+                            chb = f.read(1)
+                            ch = chb.decode('utf-8')
+
+                            cnt8 += 1
+                        else :
+                            raise asmd.ManncError('リテラルのバックスラッシュの後ろの数値は0から7までです')
+                            
+                    tmpstr += chr( num8 )
+                    continue
                 
             tmpstr += ch
             offset += 1
