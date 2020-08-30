@@ -141,16 +141,32 @@ def mytokenize(fname):
         chb = f.read(1)
         ch = chb.decode('utf-8')
         tmpstr = ''
+        # 文字リテラル読み込みループ開始
         while True:
             if ch == '"':
                 break
             #print('string={0}'.format(ch))
-            tmpstr += ch
 
+            #文字列中のバックスペースはエスケープシーケンス
+            if ch == '\\':
+                
+                offset += 1
+                f.seek( offset )
+                chb = f.read(1)
+                ch = chb.decode('utf-8')
+
+                if ch == 'n' : # 改行文字
+                    ch = "\n"
+
+                if ch == '0' : # '/nnn は８進数のコード
+                    pass
+                
+            tmpstr += ch
             offset += 1
             f.seek( offset )
             chb = f.read(1)
             ch = chb.decode('utf-8')
+        # 文字リテラル読み込みループ終了
 
         #string_i 文字列の通し番号
         label = ".L.LITERAL.{0}".format( asmd.string_i )
