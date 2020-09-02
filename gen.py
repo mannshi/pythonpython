@@ -12,6 +12,7 @@ para_reg32 = [ "edi", "esi", "edx", "ecx" ];
 para_reg8  = [ "dil", "sil", "dl",  "cl" ];
 
 if_num = 0
+while_num =0
 
 seq = 0
 #
@@ -20,6 +21,7 @@ seq = 0
 def gen( node ):
     global seq
     global if_num
+    global while_num
     
     print("# gen START")
     #asmd.pins( node )
@@ -188,15 +190,18 @@ def gen( node ):
         return 
 
     if node.kind == ND.WHILE:
+        while_num_tmp = while_num
+        while_num += 1
+
         print('#whilegen')
-        print('.LbeginXXX:')
+        print(".Lbegin{0}:".format(while_num_tmp))
         gen( node.expr )
         print('\tpop rax')
         print('\tcmp rax, 0')
-        print('je  .LendXXX')
+        print("je  .Lend{0}".format(while_num_tmp))
         gen( node.block )
-        print('jmp .LbeginXXX')
-        print('.LendXXX:')
+        print("jmp .Lbegin{0}".format(while_num_tmp))
+        print(".Lend{0}:".format(while_num_tmp))
         
         return
 
