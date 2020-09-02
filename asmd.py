@@ -69,6 +69,7 @@ class NodeKind(Enum):
     LVAR = auto()
     RETURN = auto()
     IF = auto()
+    WHILE = auto()
     ELSE = auto()
     BLOCK = auto()
     FUNC = auto()
@@ -105,6 +106,12 @@ class NodeIF:
         self.expr = 0
         self.truebl = 0
         self.elsebl = 0
+
+class NodeWHILE:
+    def __init__(self):
+        self.kind = 0
+        self.expr = 0
+        self.block = 0
 
 class NodeBLOCK:
     def __init__(self):

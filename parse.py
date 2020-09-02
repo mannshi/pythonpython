@@ -202,6 +202,20 @@ def stmt():
     #
     # 関数内関数
     #
+
+    def stmt_while():
+        if not consume( '(' ):
+            raise asmd.ManncError('while の後は ( が必要です')
+        node = asmd.NodeWHILE()
+        node.kind = ND.WHILE
+        node.expr = expr()
+
+        if not consume( ')' ) :
+            raise asmd.ManncError('while の ''('' 後は '')'' が必要です')
+        node.block = stmt()
+        
+        return node
+
     def stmt_if():
         #print('#IF')
         if not consume( '(' ) :
@@ -263,9 +277,10 @@ def stmt():
         return 0
         
     # if文の場合
+    if consume_tk( TK.WHILE ):
+        return stmt_while()
     if consume_tk( TK.IF ):
         return stmt_if()
-        
     if consume_tk( TK.RETURN ) :
         #print('#returrrrrrn')
         node = asmd.Node()

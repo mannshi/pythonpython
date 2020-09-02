@@ -187,6 +187,19 @@ def gen( node ):
             #print('\tpush rax')
         return 
 
+    if node.kind == ND.WHILE:
+        print('#whilegen')
+        print('.LbeginXXX:')
+        gen( node.expr )
+        print('\tpop rax')
+        print('\tcmp rax, 0')
+        print('je  .LendXXX')
+        gen( node.block )
+        print('jmp .LbeginXXX')
+        print('.LendXXX:')
+        
+        return
+
     if node.kind == ND.IF :
         print('#ifgen')
         gen( node.expr )
