@@ -13,6 +13,7 @@ para_reg8  = [ "dil", "sil", "dl",  "cl" ];
 
 if_num = 0
 while_num =0
+break_num = 0
 
 seq = 0
 #
@@ -22,6 +23,9 @@ def gen( node ):
     global seq
     global if_num
     global while_num
+    global break_num
+    
+    while_num_tmp = 0
     
     print("# gen START")
     #asmd.pins( node )
@@ -191,6 +195,8 @@ def gen( node ):
 
     if node.kind == ND.WHILE:
         while_num_tmp = while_num
+        break_num_tmp = break_num
+        break_num = while_num
         while_num += 1
 
         print('#whilegen')
@@ -202,7 +208,14 @@ def gen( node ):
         gen( node.block )
         print("jmp .Lbegin{0}".format(while_num_tmp))
         print(".Lend{0}:".format(while_num_tmp))
+
+        break_num = break_num_tmp
         
+        return
+
+    if node.kind == ND.BREAK:
+        print("#break")
+        print("jmp .Lend{0}".format(break_num))
         return
 
     if node.kind == ND.IF :

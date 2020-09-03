@@ -203,6 +203,13 @@ def stmt():
     # 関数内関数
     #
 
+    def stmt_break():
+        if not consume( ';' ):
+            raise asmd.ManncError('break の後は ; が必要です')
+        node = asmd.Node()
+        node.kind = ND.BREAK
+        return node
+        
     def stmt_while():
         if not consume( '(' ):
             raise asmd.ManncError('while の後は ( が必要です')
@@ -277,6 +284,8 @@ def stmt():
         return 0
         
     # if文の場合
+    if consume_tk( TK.BREAK ):
+        return stmt_break()
     if consume_tk( TK.WHILE ):
         return stmt_while()
     if consume_tk( TK.IF ):

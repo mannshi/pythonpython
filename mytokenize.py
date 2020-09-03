@@ -58,6 +58,8 @@ def mytokenize(fname):
             newtkn.kind = TK.CHAR
         elif tmpstr == 'sizeof' :
             newtkn.kind = TK.SIZEOF
+        elif tmpstr == 'break' :
+            newtkn.kind = TK.BREAK;
         else :
             newtkn.kind = TK.IDENT
         newtkn.str = tmpstr
