@@ -193,10 +193,10 @@ def funcdef():
 
 #
 # stmt = expr ";"
-# | "{" stmt* "}"
-# | "if" "(" expr ")" stmt ("else" stmt)?
-# | "while" "(" expr ")" stmt
-# | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+#      | "{" stmt* "}"
+#      | "if" "(" expr ")" stmt ("else" stmt)?
+#      | "while" "(" expr ")" stmt
+#      | "for" "(" expr? ";" expr? ";" expr? ")" stmt
 def stmt():
     #print("# stmt")
     #
@@ -247,11 +247,19 @@ def stmt():
     #
     # 関数内関数 おわり 
     #
+    if consume( ';' ) :
+        node = asmd.Node()
+        node.kind = ND.NOP
+        return node
 
     if consume( '{' ) :
         #print('#print BLOCK start')
         node = asmd.NodeBLOCK()
         node.kind = ND.BLOCK
+
+        if consume( '}' ):
+            return node
+
         while True:
             newstmt = stmt()
             node.stmts.append( newstmt )

@@ -58,6 +58,7 @@ strings = {}
 string_i = 0
 
 class NodeKind(Enum):
+    NOP      = auto()
     ADD      = auto()
     SUB      = auto()
     MUL      = auto()

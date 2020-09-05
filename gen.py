@@ -33,6 +33,10 @@ def gen( node ):
     if node == 0:
         return
 
+    if node.kind == ND.NOP :
+        print("#NOP");
+        return
+
     if node.kind == ND.STRING :
         print("\tpush offset .L.strings.{0}".format( node.val ) );
         print('\tpop rax')
