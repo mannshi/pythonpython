@@ -210,6 +210,13 @@ def stmt():
         node.kind = ND.BREAK
         return node
         
+    def stmt_continue():
+        if not consume( ';' ):
+            raise asmd.ManncError('continue の後は ; が必要です')
+        node = asmd.Node()
+        node.kind = ND.CONTINUE
+        return node
+        
     def stmt_while():
         if not consume( '(' ):
             raise asmd.ManncError('while の後は ( が必要です')
@@ -227,21 +234,15 @@ def stmt():
         #print('#IF')
         if not consume( '(' ) :
             raise asmd.ManncError('if の後は ( が必要です')
-            #sys.exit()
         node = asmd.NodeIF()
         node.kind = ND.IF
         node.expr = expr()
         if not consume( ')' ) :
-            #print('#IF 2')
             raise asmd.ManncError('if の ''('' 後は '')'' が必要です')
-            #sys.exit()
-        #print('#IF 3')
         node.truebl = stmt()
-        #print('#IF 3.5')
         if consume_tk( TK.ELSE ) :
-            #print('#IF 4')
             node.elsebl = stmt()
-        #print('#IF 5')
+
         return node
     #
     # 関数内関数 おわり 
@@ -283,7 +284,8 @@ def stmt():
 
         return 0
         
-    # if文の場合
+    if consume_tk( TK.CONTINUE ):
+        return stmt_continue()
     if consume_tk( TK.BREAK ):
         return stmt_break()
     if consume_tk( TK.WHILE ):
@@ -291,24 +293,16 @@ def stmt():
     if consume_tk( TK.IF ):
         return stmt_if()
     if consume_tk( TK.RETURN ) :
-        #print('#returrrrrrn')
         node = asmd.Node()
         node.kind = ND.RETURN
-        #print('#1')
         node.lhs = expr()
-        #print('#2')
     else :
-        #print('#3')
         node = expr()
-        #print('#4')
 
-    #print('##consume ;')
     if consume( ';' ):
-        #print('#consume ;')
         return node
     else:
         raise asmd.ManncError(';ではないトークンです{0}'.format(asmd.tkn[0].str))
-        #sys.exit()
 
 #
 # expr = assign

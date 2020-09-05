@@ -60,6 +60,8 @@ def mytokenize(fname):
             newtkn.kind = TK.SIZEOF
         elif tmpstr == 'break' :
             newtkn.kind = TK.BREAK;
+        elif tmpstr == 'continue' :
+            newtkn.kind = TK.CONTINUE;
         else :
             newtkn.kind = TK.IDENT
         newtkn.str = tmpstr
@@ -216,6 +218,12 @@ def mytokenize(fname):
             while True:
                 f.seek( offset )
                 chb = f.read(1)
+
+                #print("from_bytes <{0}>".format( int.from_bytes( chb, byteorder = 'little' ) ))
+                if int.from_bytes( chb, byteorder = 'little' ) >= 128 :
+                    offset += 1
+                    continue
+
                 ch = chb.decode('utf-8')
                 offset += 1
 
@@ -227,6 +235,11 @@ def mytokenize(fname):
             while True:
                 f.seek( offset )
                 chb = f.read(1)
+
+                if int.from_bytes( chb, byteorder = 'little' ) >= 128 :
+                    offset += 1
+                    continue
+
                 ch = chb.decode('utf-8')
                 offset += 1
 
@@ -255,7 +268,8 @@ def mytokenize(fname):
     #
     # ファイル読み込みループ
     #
-    with open(fname, 'rb') as f:
+    with open(fname, 'rb' ) as f:
+    #with open(fname, encoding='utf-8' ) as f:
 
         offset = 0
         while True:

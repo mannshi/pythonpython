@@ -213,6 +213,11 @@ def gen( node ):
         
         return
 
+    if node.kind == ND.CONTINUE:
+        print("#continue")
+        print("jmp .Lbegin{0}".format(while_num_tmp))
+        return
+
     if node.kind == ND.BREAK:
         print("#break")
         print("jmp .Lend{0}".format(break_num))

@@ -12,6 +12,7 @@ class TokenKind(Enum):
     RETURN   =  auto()
     WHILE    =  auto()
     BREAK    =  auto()
+    CONTINUE =  auto()
     IF       =  auto()
     ELSE     =  auto()
     TK_FOR   =  auto()
@@ -57,29 +58,30 @@ strings = {}
 string_i = 0
 
 class NodeKind(Enum):
-    ADD   = auto()
-    SUB   = auto()
-    MUL   = auto()
-    DIV   = auto()
-    NUM   = auto()
-    EQU   = auto()  # '=='
-    NEQ   = auto()  # '!='
-    LT    = auto()  # '<'
-    LTE   = auto()  # '<='
-    ASSIGN = auto() # '='
-    LVAR = auto()
-    RETURN = auto()
-    IF = auto()
-    WHILE = auto()
-    BREAK = auto()
-    ELSE = auto()
-    BLOCK = auto()
-    FUNC = auto()
-    FUNCDEF = auto()
-    ADDR = auto()
-    DEREF = auto()
-    STRING = auto()
-    PTR_ADD = auto()
+    ADD      = auto()
+    SUB      = auto()
+    MUL      = auto()
+    DIV      = auto()
+    NUM      = auto()
+    EQU      = auto()  # '=='
+    NEQ      = auto()  # '!='
+    LT       = auto()  # '<'
+    LTE      = auto()  # '<='
+    ASSIGN   = auto()  # '='
+    LVAR     = auto()
+    RETURN   = auto()
+    IF       = auto()
+    WHILE    = auto()
+    BREAK    = auto()
+    CONTINUE = auto()
+    ELSE     = auto()
+    BLOCK    = auto()
+    FUNC     = auto()
+    FUNCDEF  = auto()
+    ADDR     = auto()
+    DEREF    = auto()
+    STRING   = auto()
+    PTR_ADD  = auto()
 
 class Token:
     def __init__(self):
