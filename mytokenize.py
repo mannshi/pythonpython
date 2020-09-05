@@ -46,7 +46,7 @@ def mytokenize(fname):
         newtkn = asmd.Token()
         if tmpstr == 'if' :
             newtkn.kind = TK.IF
-        if tmpstr == 'while' :
+        elif tmpstr == 'while' :
             newtkn.kind = TK.WHILE
         elif tmpstr == 'else' :
             newtkn.kind = TK.ELSE
