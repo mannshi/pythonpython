@@ -18,8 +18,9 @@ answer[15]=195
 answer[16]=101
 answer[17]=20
 answer[18]=20
+answer[19]=1
 
-for n in {1..18};do
+for n in {1..19};do
     num=`printf "%02d" $n`
 	tdir=v
     ifile=$tdir/$num.c

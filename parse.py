@@ -416,12 +416,12 @@ def unary():
 
     if consume( '+' ):
         lnode = new_node_num( 0 )
-        node = new_node( ND.ADD, lnode, primary )
+        node = new_node( ND.ADD, lnode, primary() )
         return node
 
     if consume( '-' ):
         lnode = new_node_num( 0 )
-        node = new_node( ND.SUB, lnode, primary )
+        node = new_node( ND.SUB, lnode, primary() )
         return node
     
     if asmd.tkn[1].str == '[':
