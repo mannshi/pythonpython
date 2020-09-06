@@ -14,6 +14,7 @@ para_reg8  = [ "dil", "sil", "dl",  "cl" ];
 if_num = 0
 while_num =0
 break_num = 0
+switch_num = 0
 
 seq = 0
 #
@@ -24,6 +25,7 @@ def gen( node ):
     global if_num
     global while_num
     global break_num
+    global switch_num
     
     while_num_tmp = 0
     
@@ -197,6 +199,48 @@ def gen( node ):
             #print('\tpush rax')
         return 
 
+    if node.kind == ND.SWITCH:
+        switch_num_tmp = switch_num
+        switch_num += 1
+        break_num_tmp = break_num
+        break_num = switch_num_tmp
+        node.case_label = switch_num_tmp
+
+        gen( node.expr )
+        print("\tpop rax") 
+
+        n = node.case_next
+        while n != 0:
+            n.case_label = switch_num
+            switch_num += 1
+            n.case_end_label = switch_num_tmp
+            #print('\tpop rax')
+            print('\tcmp rax, {0}'.format(n.val))
+            print('\tje .L.case.{0}'.format(n.case_label) )
+            n = n.case_next
+
+        if node.default_case:
+            i = switch_num;
+            switch_num += 1
+            node.default_case.case_end_label = switch_num_tmp;
+            node.default_case.case_label = i;
+            print("\tjmp .L.case.{0}".format(i));
+
+        print("\tjmp .L.break.{0}".format(switch_num_tmp));
+        gen(node.block);
+        print(".L.break.{0}:\n".format(switch_num_tmp));
+
+        break_num = break_num_tmp;
+
+        return;
+
+        #switch 終わり
+
+    if node.kind == ND.CASE:
+        print(".L.case.{0}:".format( node.case_label ) )
+        gen( node.block )
+        return
+
     if node.kind == ND.WHILE:
         while_num_tmp = while_num
         break_num_tmp = break_num
@@ -224,7 +268,7 @@ def gen( node ):
 
     if node.kind == ND.BREAK:
         print("#break")
-        print("jmp .Lend{0}".format(break_num))
+        print("jmp .L.break.{0}".format(break_num))
         return
 
     if node.kind == ND.IF :

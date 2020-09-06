@@ -203,6 +203,39 @@ def stmt():
     # 関数内関数
     #
 
+    def stmt_switch():
+        if not consume( '(' ):
+            raise asmd.ManncError('switch の後は ( が必要です')
+        node = asmd.NodeSWITCH()
+        node.kind = ND.SWITCH
+        node.expr = expr()
+        if not consume( ')' ) :
+            raise asmd.ManncError('switch の ''('' 後は '')'' が必要です')
+
+        sw = asmd.current_switch
+        asmd.current_switch = node
+        node.block = stmt()
+        asmd.current_switch = sw
+        
+        return node
+
+    def stmt_case():
+
+        print("#CASE")
+        if asmd.current_switch == 0:
+            raise asmd.ManncError('stray case')
+        val = expect_number()
+        print("#VAL {0}".format(val))
+
+        expect( ':' )
+        node = asmd.NodeCASE()
+        node.kind = ND.CASE
+        node.block = stmt()
+        node.val = val
+        node.case_next = asmd.current_switch.case_next
+        asmd.current_switch.case_next = node
+        return node
+
     def stmt_break():
         if not consume( ';' ):
             raise asmd.ManncError('break の後は ; が必要です')
@@ -292,6 +325,10 @@ def stmt():
 
         return 0
         
+    if consume_tk( TK.SWITCH ):
+        return stmt_switch()
+    if consume_tk( TK.CASE ):
+        return stmt_case()
     if consume_tk( TK.CONTINUE ):
         return stmt_continue()
     if consume_tk( TK.BREAK ):

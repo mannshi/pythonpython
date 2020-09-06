@@ -11,6 +11,8 @@ class TokenKind(Enum):
     EOF      =  auto()
     RETURN   =  auto()
     WHILE    =  auto()
+    SWITCH   =  auto()
+    CASE     =  auto()
     BREAK    =  auto()
     CONTINUE =  auto()
     IF       =  auto()
@@ -57,6 +59,8 @@ functions = []
 strings = {} 
 string_i = 0
 
+current_switch = 0
+
 class NodeKind(Enum):
     NOP      = auto()
     ADD      = auto()
@@ -73,6 +77,8 @@ class NodeKind(Enum):
     RETURN   = auto()
     IF       = auto()
     WHILE    = auto()
+    SWITCH   = auto()
+    CASE     = auto()
     BREAK    = auto()
     CONTINUE = auto()
     ELSE     = auto()
@@ -111,6 +117,22 @@ class NodeIF:
         self.expr = 0
         self.truebl = 0
         self.elsebl = 0
+
+class NodeSWITCH:
+    def __init__(self):
+        self.kind = 0
+        self.expr = 0
+        self.block = 0
+        self.case_next = 0
+        self.case_label = 0
+        self.default_case = 0
+
+class NodeCASE:
+    def __init__(self):
+        self.kind = 0
+        self.val = 0
+        self.block = 0
+        self.case_next = 0
 
 class NodeWHILE:
     def __init__(self):

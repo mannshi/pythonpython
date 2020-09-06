@@ -46,10 +46,14 @@ def mytokenize(fname):
         newtkn = asmd.Token()
         if tmpstr == 'if' :
             newtkn.kind = TK.IF
-        elif tmpstr == 'while' :
-            newtkn.kind = TK.WHILE
         elif tmpstr == 'else' :
             newtkn.kind = TK.ELSE
+        elif tmpstr == 'while' :
+            newtkn.kind = TK.WHILE
+        elif tmpstr == 'switch' :
+            newtkn.kind = TK.SWITCH
+        elif tmpstr == 'case' :
+            newtkn.kind = TK.CASE
         elif tmpstr == 'return' :
             newtkn.kind = TK.RETURN
         elif tmpstr == 'int' :
@@ -284,7 +288,8 @@ def mytokenize(fname):
             # 一文字のトークン の場合
             if ch == ';' or ch == '+' or ch == '-' or ch == '*' or \
                ch == '(' or ch == ')' or ch == '{' or ch == '}' or \
-               ch == ',' or ch == '&' or ch == '[' or ch == ']' :
+               ch == ',' or ch == '&' or ch == '[' or ch == ']' or \
+               ch == ':' :
                 newtkn = asmd.Token()
                 newtkn.kind = TK.RESERVED
                 newtkn.str = ch
