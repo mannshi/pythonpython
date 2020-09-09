@@ -125,6 +125,54 @@ def mytokenize(fname):
         newtkn.kind = TK.RESERVED
         asmd.tkn.append( newtkn )
 
+    def tk_char():
+        nonlocal ch
+        nonlocal offset
+        nonlocal offset
+        f.seek( offset )
+        offset += 1
+        chb = f.read(1)
+        ch  = chb.decode('utf-8')
+
+        if ch == '\\' :
+            # エスケープ
+            f.seek( offset )
+            offset += 1
+            chb = f.read(1)
+            ch  = chb.decode('utf-8')
+            if ch == 'n':
+                # 改行文字
+                newtkn = asmd.Token()
+                newtkn.kind = TK.NUM
+                newtkn.val = 10
+                asmd.tkn.append( newtkn )
+            else:
+                raise asmd.ManncError('文字の特殊文字は改行だけ')
+                
+        else :
+            #f.seek( offset )
+            #offset += 1
+            #chb = f.read(1)
+            #ch  = chb.decode('utf-8')
+
+            # 文字を数値に変換
+            newtkn = asmd.Token()
+            newtkn.kind = TK.NUM
+            newtkn.val = ord( ch )
+            asmd.tkn.append( newtkn )
+            #print("<{0}>".format(newtkn.val))
+
+        # 閉じクォート
+        f.seek( offset )
+        offset += 1
+        chb = f.read(1)
+        ch  = chb.decode('utf-8')
+        if ch != '\'' :
+            raise asmd.ManncError('文字は一文字だけ')
+                
+            
+         
+
     def tk_great():
         nonlocal ch
         nonlocal offset
@@ -316,6 +364,9 @@ def mytokenize(fname):
 
             # 文字列の場合
             if ch == '"' : tk_string(); continue
+
+            # 文字の場合
+            if ch == '\'': tk_char(); continue
 
             # 数字の場合    
             tk_number()
