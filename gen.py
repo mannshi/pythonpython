@@ -256,6 +256,9 @@ def gen( node ):
         gen( node.block )
         print("jmp .Lbegin{0}".format(while_num_tmp))
         print(".Lend{0}:".format(while_num_tmp))
+        ###print(".L.break.{0}:".format(break_num_tmp))
+        print(".L.break.{0}:".format(break_num))
+        print('#whilegen end')
 
         break_num = break_num_tmp
         
