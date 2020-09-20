@@ -210,6 +210,7 @@ def stmt():
     # declaration = basetype declarator type-suffix ("=" lvar-initializer)? ";"
     #             | basetype ";"
     def stmt_declaration():
+        # declaration = basetype declarator ";"
         pass
         
     def stmt_switch():
@@ -334,6 +335,8 @@ def stmt():
 
         return 0
         
+    if is_typename():
+        return stmt_declaration()
     if consume_tk( TK.SWITCH ):
         return stmt_switch()
     if consume_tk( TK.CASE ):
@@ -748,15 +751,37 @@ def add_type( node ) :
 
 # basetypeの最終目標↓
 # basetype = builtin-type | struct-decl | typedef-name | enum-specifier
+# builtin-typeの最終目標↓
+# builtin-type = "void" | "_Bool" | "char" | "short" | "int"
+#              | "long" | "long" "long"
 def basetype():
+    # basetype = builtin-type
+    # builtin-type = "int"
     pass
 
 # declaratorの最終目標↓
 # declarator = "*"* ("(" declarator ")" | ident) type-suffix
 def declarator():
+    # declarator = ident
     pass
 
 # type-suffixの最終目標↓
 # type-suffix = ("[" const-expr? "]" type-suffix)?
 def type_suffix():
     pass
+
+# is_typenameの最終目標↓
+#// Returns true if the next token represents a type.
+#static bool is_typename(void) {
+#  return peek("void") || peek("_Bool") || peek("char") || peek("short") ||
+#         peek("int") || peek("long") || peek("enum") || peek("struct") ||
+#         peek("typedef") || peek("static") || peek("extern") ||
+#         peek("signed") || find_typedef(token);
+#}
+def is_typename():
+    # builtin-type = "int"
+    if asmd.tkn[0].kind in ( TK.INT2, 999 ):
+        return True
+    else :
+        return False
+

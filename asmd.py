@@ -4,6 +4,11 @@ from enum import IntEnum, auto
 import pprint
 import inspect
 
+class StorageClas(Enum):
+    TYPEDEF = auto()
+    #STATIC  = auto()
+    #EXTERN  = auto()
+
 class TokenKind(Enum):
     RESERVED =  auto()
     IDENT    =  auto()
@@ -19,6 +24,7 @@ class TokenKind(Enum):
     ELSE     =  auto()
     TK_FOR   =  auto()
     INT      =  auto()
+    INT2     =  auto()
     CHAR     =  auto()
     STRUCT   =  auto()
     SIZEOF   =  auto()
