@@ -211,7 +211,10 @@ def stmt():
     #             | basetype ";"
     def stmt_declaration():
         # declaration = basetype declarator ";"
-        pass
+        ty = basetype()
+        ( dummy, name ) = declarator()
+        if not consume( ';' ) :
+            raise asmd.ManncError('宣言文 の後は ; が必要です')
         
     def stmt_switch():
         if not consume( '(' ):
@@ -756,14 +759,25 @@ def add_type( node ) :
 #              | "long" | "long" "long"
 def basetype():
     # basetype = builtin-type
-    # builtin-type = "int"
-    pass
+    # builtin-type = "int2"
+    if not is_typename():
+        raise asmd.ManncError( '変数の定義が型名からはじまりません。 100' )
+
+    if consume_tk( TK.INT2 ):
+        return asmd.Type2( kind = TYP.INT2, size = 4, align = 4, is_complete = True, base = 0, array_len = 0, members = 0, return_ty = 0 )
+    else :
+        raise asmd.ManncError( 'サポートしていない型です' )
 
 # declaratorの最終目標↓
 # declarator = "*"* ("(" declarator ")" | ident) type-suffix
 def declarator():
     # declarator = ident
-    pass
+    if not asmd.tkn[0].kind :
+        raise asmd.ManncError( '型名の後に変数名がありません' )
+
+    name = asmd.tkn[0].str
+
+    return( 0, name ) # 型と名前(ident)を返す
 
 # type-suffixの最終目標↓
 # type-suffix = ("[" const-expr? "]" type-suffix)?
@@ -779,7 +793,7 @@ def type_suffix():
 #         peek("signed") || find_typedef(token);
 #}
 def is_typename():
-    # builtin-type = "int"
+    # builtin-type = "int2"
     if asmd.tkn[0].kind in ( TK.INT2, 999 ):
         return True
     else :

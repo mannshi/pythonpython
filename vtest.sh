@@ -22,8 +22,9 @@ answer[19]=1
 answer[20]=1
 answer[21]=1
 answer[22]=1
+answer[23]=100
 
-for n in {1..22};do
+for n in {1..23};do
     num=`printf "%02d" $n`
 	tdir=v
     ifile=$tdir/$num.c

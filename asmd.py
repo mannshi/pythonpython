@@ -173,6 +173,7 @@ class NodeFUNCCALL:
 
 class typ(Enum):
     INT    = auto()
+    INT2   = auto()
     CHAR   = auto()
     PTR    = auto()
     ARRAY  = auto()

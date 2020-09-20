@@ -36,7 +36,7 @@ def mytokenize(fname):
         nonlocal offset
 
         tmpstr = ''
-        while ch.isalpha():
+        while ch.isalpha() or ch.isdigit():
             tmpstr += ch
             f.seek( offset )
             chb = f.read(1)
