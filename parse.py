@@ -46,6 +46,9 @@ def getgvar():
         else:
             # char型
             thistype.ty = TYP.CHAR
+    elif consume_tk( TK.STRUCT ) :
+        pass
+
     else:
         raise asmd.ManncError( '変数の定義が型名からはじまりません。2 {0}'.format(asmd.tkn[0].str ) )
 
@@ -203,6 +206,12 @@ def stmt():
     # 関数内関数
     #
 
+    # declaration の最終目標↓
+    # declaration = basetype declarator type-suffix ("=" lvar-initializer)? ";"
+    #             | basetype ";"
+    def stmt_declaration():
+        pass
+        
     def stmt_switch():
         if not consume( '(' ):
             raise asmd.ManncError('switch の後は ( が必要です')
@@ -737,3 +746,17 @@ def add_type( node ) :
         print('#deref add_type {0}'.format( node.type ))
         return
 
+# basetypeの最終目標↓
+# basetype = builtin-type | struct-decl | typedef-name | enum-specifier
+def basetype():
+    pass
+
+# declaratorの最終目標↓
+# declarator = "*"* ("(" declarator ")" | ident) type-suffix
+def declarator():
+    pass
+
+# type-suffixの最終目標↓
+# type-suffix = ("[" const-expr? "]" type-suffix)?
+def type_suffix():
+    pass

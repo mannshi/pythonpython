@@ -60,6 +60,8 @@ def mytokenize(fname):
             newtkn.kind = TK.INT
         elif tmpstr == 'char' :
             newtkn.kind = TK.CHAR
+        elif tmpstr == 'struct' :
+            newtkn.kind = TK.STRUCT
         elif tmpstr == 'sizeof' :
             newtkn.kind = TK.SIZEOF
         elif tmpstr == 'break' :
@@ -121,6 +123,24 @@ def mytokenize(fname):
             newtkn.str = '=='
         else: #'=' の場合
             newtkn.str = '='
+            offset -= 1
+        newtkn.kind = TK.RESERVED
+        asmd.tkn.append( newtkn )
+
+    def tk_member(): # '->' or '-'
+        nonlocal ch
+        nonlocal offset
+        
+        f.seek( offset )
+        offset += 1
+        chb = f.read(1)
+        ch  = chb.decode('utf-8')
+
+        newtkn = asmd.Token()
+        if ch == '>' : # '->'の場合
+            newtk.str = '->'
+        else: # '-' の場合
+            newtkn.str = '-'
             offset -= 1
         newtkn.kind = TK.RESERVED
         asmd.tkn.append( newtkn )
@@ -337,12 +357,16 @@ def mytokenize(fname):
             if ch == ';' or ch == '+' or ch == '-' or ch == '*' or \
                ch == '(' or ch == ')' or ch == '{' or ch == '}' or \
                ch == ',' or ch == '&' or ch == '[' or ch == ']' or \
-               ch == ':' :
+               ch == ':' or ch == '.':
                 newtkn = asmd.Token()
                 newtkn.kind = TK.RESERVED
                 newtkn.str = ch
                 asmd.tkn.append( newtkn )
                 continue
+
+            # '-' 1の場合 '-' または '->' の場合
+            # '--' は未実装
+            if ch == '-': tk_member(); continue
 
             # '/' の場合（ブロックコメント、一行コメント、割り算）
             if ch == '/': tk_comment(); continue

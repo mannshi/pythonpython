@@ -20,6 +20,7 @@ class TokenKind(Enum):
     TK_FOR   =  auto()
     INT      =  auto()
     CHAR     =  auto()
+    STRUCT   =  auto()
     SIZEOF   =  auto()
     STRING   =  auto()
 
@@ -28,6 +29,17 @@ code = []
 
 strings = [] #文字列を格納する配列
 strings_i  = 0 #カウンタ
+
+class Type2:
+    def __init__( self, kind, size, align, is_complete, base, array_len, members, return_ty ):
+        self.kind = kind
+        self.size = size
+        self.align = align
+        self.is_complete = is_complete
+        self.base = base
+        self.array_len = array_len
+        self.members = members
+        self.return_ty = return_ty
 
 class TypeType:
     def __init__(self, kind, size, align, array_len, base, function):
@@ -68,6 +80,8 @@ class NodeKind(Enum):
     MUL      = auto()
     DIV      = auto()
     NUM      = auto()
+    MEMBER   = auto()  # 構造体の'. '
+    ARROW    = auto()  # 構造体の'->'
     EQU      = auto()  # '=='
     NEQ      = auto()  # '!='
     LT       = auto()  # '<'
@@ -152,10 +166,11 @@ class NodeFUNCCALL:
         self.para = [] 
 
 class typ(Enum):
-    INT   = auto()
-    CHAR  = auto()
-    PTR   = auto()
-    ARRAY = auto()
+    INT    = auto()
+    CHAR   = auto()
+    PTR    = auto()
+    ARRAY  = auto()
+    STRUCT = auto()
 
 class myType:
     def __init__(self):
