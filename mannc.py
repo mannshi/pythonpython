@@ -1,6 +1,7 @@
 from enum import Enum
 import sys
 from enum import IntEnum, auto
+from asmd import NodeKind as ND
 import asmd
 import gen
 import parse
@@ -34,6 +35,22 @@ def mannc( filename ):
     print('#PRINT glvars_t END')
 
     print('#offset {0}'.format(asmd.offset))
+
+    #
+    # ローカル変数のoffsetをセットする リファクタリング用
+    #
+    print('#{0}'.format( asmd.code ) )
+    for index1 in range(len(asmd.code)):
+        # 関数にパラメータがある場合だと
+        # offsetの初期値は 56
+        offset = 0
+        if asmd.code[index1].kind == ND.FUNCDEF:
+            for index2 in range(len(asmd.code[index1].lvars2)):
+                offset = asmd.align_to( offset, asmd.code[index1].lvars2[index2].ty.align)
+                offset += asmd.code[index1].lvars2[index2].ty.size
+                asmd.code[index1].lvars2[index2].offset = offset
+                print("#offset {0} = {1}".format( asmd.code[index1].lvars2[index2].name, asmd.code[index1].lvars2[index2].offset ) )
+
 
     #
     # アセンブリコード出力開始

@@ -4,11 +4,6 @@ from enum import IntEnum, auto
 import pprint
 import inspect
 
-class StorageClas(Enum):
-    TYPEDEF = auto()
-    #STATIC  = auto()
-    #EXTERN  = auto()
-
 class TokenKind(Enum):
     RESERVED =  auto()
     IDENT    =  auto()
@@ -36,6 +31,16 @@ code = []
 strings = [] #文字列を格納する配列
 strings_i  = 0 #カウンタ
 
+
+#######################################################
+#   リファクタリング
+#######################################################
+
+class StorageClas(Enum):
+    TYPEDEF = auto()
+    #STATIC  = auto()
+    #EXTERN  = auto()
+
 class Type2:
     def __init__( self, kind, size, align, is_complete, base, array_len, members, return_ty ):
         self.kind = kind
@@ -46,6 +51,21 @@ class Type2:
         self.array_len = array_len
         self.members = members
         self.return_ty = return_ty
+
+class Var2:
+    #def __init__( self ):
+    def __init__( self, name, ty, is_local, offset, is_static, initializer ):
+        self.name = name
+        self.ty = ty
+        self.is_local = is_local
+        self.offset = offset
+        self.is_static = is_static
+        self.initializer = initializer
+
+
+#######################################################
+#   リファクタリング
+#######################################################
 
 class TypeType:
     def __init__(self, kind, size, align, array_len, base, function):
@@ -196,6 +216,7 @@ class NodeFUNCDEF:
         self.name = 0
         self.type = 0
         self.lvars = {} # 変数名　と　offset
+        self.lvars2 = {} # 変数名　と　offset リファクタリング用
         self.lvars_t = {} # 変数名　と　型
         self.offset = 0
         self.block = []  # 関数本体（ブロックといっしょ）

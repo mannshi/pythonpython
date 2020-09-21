@@ -6,6 +6,8 @@ from asmd import NodeKind as ND
 from asmd import typ as TYP
 import copy
 
+locals2 = []
+
 #
 # パーサ
 #
@@ -102,6 +104,8 @@ def program() :
 #            ident '(' ( "," ident )* ')'  ) "{" stmt* "}"
 #
 def funcdef():
+    global locals2
+
     newnode = asmd.NodeFUNCDEF()
 
     if asmd.tkn[0].kind == TK.INT:
@@ -179,9 +183,31 @@ def funcdef():
 
     newnode.lvars = copy.deepcopy( asmd.lvars )
 
+    #newnode.lvars2 = copy.deepcopy( locals2 )
+    newnode.lvars2 = locals2
+    print('#0921')
+    if newnode.lvars2 != 0 :
+        for item in newnode.lvars2:
+            print("#name={0}".format(item.name))
+            print("#offset={0}".format(item.offset))
+
+            print("#ty.kind={0}".format(item.ty.kind))
+            print("#ty.kind ={0}".format(item.ty.kind))
+            print("#ty.size ={0}".format(item.ty.size))
+            print("#ty.align ={0}".format(item.ty.align))
+            print("#ty.is_complete ={0}".format(item.ty.is_complete))
+            print("#ty.base ={0}".format(item.ty.base))
+            print("#ty.array_len ={0}".format(item.ty.array_len))
+            print("#ty.members ={0}".format(item.ty.members))
+            print("#ty.return_ty ={0}".format(item.ty.return_ty))
+            
+        
+
     newnode.lvars_t = copy.deepcopy( asmd.lvars_t )
     newnode.offset = asmd.offset
 
+
+    
     return newnode
 
 
@@ -209,12 +235,17 @@ def stmt():
     # declaration の最終目標↓
     # declaration = basetype declarator type-suffix ("=" lvar-initializer)? ";"
     #             | basetype ";"
-    def stmt_declaration():
+
+    def stmt_declaration2():
+
         # declaration = basetype declarator ";"
-        ty = basetype()
-        ( dummy, name ) = declarator()
-        if not consume( ';' ) :
-            raise asmd.ManncError('宣言文 の後は ; が必要です')
+
+        ty = basetype2()
+        ( dummy, name ) = declarator2()
+        #if not consume( ';' ) :
+            #raise asmd.ManncError('宣言文 の後は ; が必要です')
+        
+        new_lvar2( name, ty )
         
     def stmt_switch():
         if not consume( '(' ):
@@ -338,8 +369,8 @@ def stmt():
 
         return 0
         
-    if is_typename():
-        return stmt_declaration()
+    if is_typename2():
+        return stmt_declaration2()
     if consume_tk( TK.SWITCH ):
         return stmt_switch()
     if consume_tk( TK.CASE ):
@@ -757,10 +788,12 @@ def add_type( node ) :
 # builtin-typeの最終目標↓
 # builtin-type = "void" | "_Bool" | "char" | "short" | "int"
 #              | "long" | "long" "long"
-def basetype():
+def basetype2():
+
     # basetype = builtin-type
     # builtin-type = "int2"
-    if not is_typename():
+
+    if not is_typename2():
         raise asmd.ManncError( '変数の定義が型名からはじまりません。 100' )
 
     if consume_tk( TK.INT2 ):
@@ -770,18 +803,19 @@ def basetype():
 
 # declaratorの最終目標↓
 # declarator = "*"* ("(" declarator ")" | ident) type-suffix
-def declarator():
+def declarator2():
     # declarator = ident
     if not asmd.tkn[0].kind :
         raise asmd.ManncError( '型名の後に変数名がありません' )
 
     name = asmd.tkn[0].str
+    del asmd.tkn[0]
 
     return( 0, name ) # 型と名前(ident)を返す
 
 # type-suffixの最終目標↓
 # type-suffix = ("[" const-expr? "]" type-suffix)?
-def type_suffix():
+def type_suffix2():
     pass
 
 # is_typenameの最終目標↓
@@ -792,10 +826,27 @@ def type_suffix():
 #         peek("typedef") || peek("static") || peek("extern") ||
 #         peek("signed") || find_typedef(token);
 #}
-def is_typename():
+def is_typename2():
     # builtin-type = "int2"
     if asmd.tkn[0].kind in ( TK.INT2, 999 ):
         return True
     else :
         return False
 
+def new_lvar2( name, ty ):
+    global locals2
+
+    v = new_var2( name, ty, True )
+    locals2.append( v )
+    
+
+def new_var2( name, ty, is_local ):
+    tmp = name
+    v = asmd.Var2( name = tmp, \
+        ty = ty , \
+        is_local = is_local , \
+        offset = 0 , \
+        is_static = False, \
+        initializer = 0)
+    
+    return v
