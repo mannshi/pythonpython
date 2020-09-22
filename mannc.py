@@ -51,6 +51,7 @@ def mannc( filename ):
                 offset += asmd.code[index1].lvars2[index2].ty.size
                 asmd.code[index1].lvars2[index2].offset = offset
                 print("#offset {0} = {1}".format( asmd.code[index1].lvars2[index2].name, asmd.code[index1].lvars2[index2].offset ) )
+
             asmd.code[index1].offset = offset
             print("#func offset={0}".format(offset))
 

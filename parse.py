@@ -185,8 +185,9 @@ def funcdef():
 
     #newnode.lvars2 = copy.deepcopy( locals2 )
     newnode.lvars2 = locals2
-    print('#0921')
+    asmd.pins(newnode)
     if newnode.lvars2 != 0 :
+        print('#0921')
         for item in newnode.lvars2.values():
             print("#name={0}".format(item))
 
@@ -202,13 +203,8 @@ def funcdef():
 
     newnode.lvars_t = copy.deepcopy( asmd.lvars_t )
     newnode.offset = asmd.offset
-
-
     
     return newnode
-
-
-
 
 #
 # program = stmt*
@@ -242,7 +238,7 @@ def stmt():
         #if not consume( ';' ) :
             #raise asmd.ManncError('宣言文 の後は ; が必要です')
         
-        new_lvar2( name, ty )
+        return new_lvar2( name, ty )
         
     def stmt_switch():
         if not consume( '(' ):
@@ -409,6 +405,10 @@ def assign():
     node = equality()
     if consume( '=' ):
         node = new_node( ND.ASSIGN, node, assign() )
+    elif consume( '=2' ):
+        print("#test0922 ass2")
+        node = new_node( ND.ASSIGN2, node, assign() )
+
     return node
         
 #
@@ -592,12 +592,12 @@ def primary():
 
             # リファクタリング用
             if asmd.tkn[0].str in locals2.keys():
-                print('0922test{0}'.format( asmd.tkn[0].str) )
+                print('#0922test{0}'.format( asmd.tkn[0].str) )
                 newnode = asmd.Node()
                 newnode.kind = ND.LVAR2
                 newnode.name2 = asmd.tkn[0].str #Nodeに変数名は必要ない？
                 newnode.size = locals2[ asmd.tkn[0].str ].ty.size
-                newnode.offset = locals2[ asmd.tkn[0].str ]
+                newnode.offset = locals2[ asmd.tkn[0].str ].offset
                 newnode.type = locals2[ asmd.tkn[0].str ]
                 del asmd.tkn[0]
                 return newnode
@@ -848,6 +848,9 @@ def new_lvar2( name, ty ):
     v = new_var2( name, ty, True )
     locals2[ name ] = v
     
+    node = asmd.Node()
+    node.kind = ND.NOP
+    return node
 
 def new_var2( name, ty, is_local ):
     tmp = name

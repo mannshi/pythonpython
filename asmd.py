@@ -113,6 +113,7 @@ class NodeKind(Enum):
     LT       = auto()  # '<'
     LTE      = auto()  # '<='
     ASSIGN   = auto()  # '='
+    ASSIGN2  = auto()  # '=2'
     LVAR     = auto()
     LVAR2    = auto()
     RETURN   = auto()

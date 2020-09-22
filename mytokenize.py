@@ -123,6 +123,8 @@ def mytokenize(fname):
         newtkn = asmd.Token()
         if ch == '=' : #'==' の場合
             newtkn.str = '=='
+        elif ch == '2' : #'=2' の場合 リファクタリング
+            newtkn.str = '=2'
         else: #'=' の場合
             newtkn.str = '='
             offset -= 1
@@ -374,6 +376,7 @@ def mytokenize(fname):
             if ch == '/': tk_comment(); continue
 
             # '=' または '==' の場合
+            # '===' の場合 リファクタリング
             if ch == '=': tk_equal(); continue
 
             # '<' または '<=' の場合

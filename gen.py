@@ -46,10 +46,16 @@ def gen( node ):
         print('\tpush rax')
         return
 
+    # NodeKind が変数の場合 リファクタリング用
+    if node.kind == ND.LVAR2 :
+        print("#0922 x ")
+        gen_lval2( node )
+        return
+
     # NodeKind が変数の場合
     if node.kind == ND.LVAR :
-        print("#in {0}(): if node.kind == {1}".format(inspect.currentframe().f_back.f_code.co_name, node.kind) )
         gen_lval( node )
+
         # 配列の場合のみアドレスが指す先をメモリから読み込む処理を飛ばす
         if node.type.kind != TYP.ARRAY:
             load( node.size )
@@ -57,15 +63,6 @@ def gen( node ):
 
     # NodeKind が代入の場合
     if node.kind == ND.ASSIGN :
-        #print("#assign")
-        #print("#in {0}:{1}".format(os.path.basename(inspect.currentframe().f_back.f_code.co_filename),  inspect.currentframe().f_back.f_lineno) )
-        #asmd.pins( node.lhs ) 
-        #asmd.pins( node.lhs.lhs ) if node.lhs != 0 else 0
-        #asmd.pins( node.lhs.lhs.lhs ) if node.lhs.lhs !=0 else 0
-        #asmd.pins( node.lhs.lhs.lhs.type ) if node.lhs.lhs !=0 else 0
-        #asmd.pins( node.lhs.lhs.lhs.type.base ) if node.lhs.lhs !=0 else 0
-        #asmd.pins( node.lhs.lhs.rhs ) if node.lhs.lhs !=0 else 0
-        #asmd.pins( node.lhs.lhs.rhs.type ) if node.lhs.lhs !=0 else 0
         gen_lval( node.lhs )
         gen( node.rhs )
         store( node.lhs.size )
@@ -473,3 +470,17 @@ def store( size ):
         print('\tmov [rax], rdi');
 
     print('\tpush rdi')
+
+def gen_lval2( node ):
+    gen_addr2( node )
+
+def gen_addr2( node ):
+    
+    if node.kind == ND.LVAR2 :
+        asmd.pins( node.offset )
+        print('\tlea rax, [rbp-{0}]'.format(node.offset));
+        print("\tpush rax\n");
+        pass
+    else :
+        pass
+        # node-> kind == ND_DEREF, ND_MEMBER
