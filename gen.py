@@ -6,6 +6,7 @@ import json # json.dumps 用
 import inspect
 import os
 
+lvars2 = {}
 
 para_reg64 = [ "rdi", "rsi", "rdx", "rcx" ];
 para_reg32 = [ "edi", "esi", "edx", "ecx" ];
@@ -26,6 +27,7 @@ def gen( node ):
     global while_num
     global break_num
     global switch_num
+    global lvars2
     
     while_num_tmp = 0
     
@@ -68,6 +70,19 @@ def gen( node ):
         store( node.lhs.size )
         return
 
+    # NodeKind が代入の場合 リファクタリング
+    if node.kind == ND.ASSIGN2 :
+        print("#0922 ASSIGN2")
+        print("#lhs")
+        asmd.pins( node.lhs)
+        print("#rhs")
+        asmd.pins( node.rhs)
+
+        gen_lval2( node.lhs )
+        gen( node.rhs )
+        store( node.lhs.size )
+        return
+
     # Nodekind が '*' の場合
     if node.kind == ND.DEREF :
         print('#test001')
@@ -92,6 +107,8 @@ def gen( node ):
         return
 
     if node.kind == ND.FUNCDEF :
+
+        lvars2 = node.lvars2
 
         node.myself()
 
@@ -472,13 +489,18 @@ def store( size ):
     print('\tpush rdi')
 
 def gen_lval2( node ):
+
+    # ARRAYだったらエラー処理　を組み込む
+
     gen_addr2( node )
 
 def gen_addr2( node ):
     
+    global lvas2
+
     if node.kind == ND.LVAR2 :
-        asmd.pins( node.offset )
-        print('\tlea rax, [rbp-{0}]'.format(node.offset));
+        asmd.pins( node )
+        print('\tlea rax, [rbp-{0}]'.format(lvars2[node.name2].offset));
         print("\tpush rax\n");
         pass
     else :
