@@ -384,6 +384,9 @@ def gen_lval(node):
             return
 
         # グローバル変数でないときにローカル変数とみなす
+        #if len(node.lvars2) > 0 :
+            #return
+
         print('#here {0}'.format(var))
         offset = asmd.lvars[var].offset
         print('#gen_lval var={0} offset={1}'.format(var, offset ) )

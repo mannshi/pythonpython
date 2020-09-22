@@ -114,6 +114,7 @@ class NodeKind(Enum):
     LTE      = auto()  # '<='
     ASSIGN   = auto()  # '='
     LVAR     = auto()
+    LVAR2    = auto()
     RETURN   = auto()
     IF       = auto()
     WHILE    = auto()
@@ -143,6 +144,7 @@ class Token:
 
 class Node:
     def __init__(self):
+        self.name2 = 0
         self.kind = 0
         self.lhs = 0
         self.rhs = 0

@@ -6,7 +6,7 @@ from asmd import NodeKind as ND
 from asmd import typ as TYP
 import copy
 
-locals2 = []
+locals2 = {}
 
 #
 # パーサ
@@ -187,9 +187,8 @@ def funcdef():
     newnode.lvars2 = locals2
     print('#0921')
     if newnode.lvars2 != 0 :
-        for item in newnode.lvars2:
-            print("#name={0}".format(item.name))
-            print("#offset={0}".format(item.offset))
+        for item in newnode.lvars2.values():
+            print("#name={0}".format(item))
 
             print("#ty.kind={0}".format(item.ty.kind))
             print("#ty.kind ={0}".format(item.ty.kind))
@@ -200,8 +199,6 @@ def funcdef():
             print("#ty.array_len ={0}".format(item.ty.array_len))
             print("#ty.members ={0}".format(item.ty.members))
             print("#ty.return_ty ={0}".format(item.ty.return_ty))
-            
-        
 
     newnode.lvars_t = copy.deepcopy( asmd.lvars_t )
     newnode.offset = asmd.offset
@@ -593,6 +590,18 @@ def primary():
                 del asmd.tkn[0]
                 return newnode
 
+            # リファクタリング用
+            if asmd.tkn[0].str in locals2.keys():
+                print('0922test{0}'.format( asmd.tkn[0].str) )
+                newnode = asmd.Node()
+                newnode.kind = ND.LVAR2
+                newnode.name2 = asmd.tkn[0].str #Nodeに変数名は必要ない？
+                newnode.size = locals2[ asmd.tkn[0].str ].ty.size
+                newnode.offset = locals2[ asmd.tkn[0].str ]
+                newnode.type = locals2[ asmd.tkn[0].str ]
+                del asmd.tkn[0]
+                return newnode
+
             if not asmd.tkn[0].str in asmd.lvars :
                 raise asmd.ManncError('宣言されていない変数を使用しようとしています<{0}><{1}>'.format(asmd.tkn[0].str, asmd.lvars ) )
 
@@ -837,7 +846,7 @@ def new_lvar2( name, ty ):
     global locals2
 
     v = new_var2( name, ty, True )
-    locals2.append( v )
+    locals2[ name ] = v
     
 
 def new_var2( name, ty, is_local ):

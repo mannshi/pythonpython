@@ -39,17 +39,20 @@ def mannc( filename ):
     #
     # ローカル変数のoffsetをセットする リファクタリング用
     #
-    print('#{0}'.format( asmd.code ) )
     for index1 in range(len(asmd.code)):
-        # 関数にパラメータがある場合だと
-        # offsetの初期値は 56
-        offset = 0
         if asmd.code[index1].kind == ND.FUNCDEF:
-            for index2 in range(len(asmd.code[index1].lvars2)):
-                offset = asmd.align_to( offset, asmd.code[index1].lvars2[index2].ty.align)
+            # 関数にパラメータがある場合だと
+            # offsetの初期値は 56
+            # そうでない場合は 0
+            offset = 0
+            for index2 in asmd.code[index1].lvars2.keys():
+                offset = asmd.align_to( offset, \
+                     asmd.code[index1].lvars2[index2].ty.align)
                 offset += asmd.code[index1].lvars2[index2].ty.size
                 asmd.code[index1].lvars2[index2].offset = offset
                 print("#offset {0} = {1}".format( asmd.code[index1].lvars2[index2].name, asmd.code[index1].lvars2[index2].offset ) )
+            asmd.code[index1].offset = offset
+            print("#func offset={0}".format(offset))
 
 
     #
