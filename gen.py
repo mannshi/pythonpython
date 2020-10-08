@@ -52,13 +52,18 @@ def gen( node ):
     if node.kind == ND.LVAR2 :
         print("#0922 x ")
         gen_lval2( node )
+
+        # 配列の場合のみアドレスが指す先をメモリから読み込む処理を
+        # 飛ばす条件分岐を追加する必要がある todo
+        load( node.size )
+
         return
 
     # NodeKind が変数の場合
     if node.kind == ND.LVAR :
         gen_lval( node )
 
-        # 配列の場合のみアドレスが指す先をメモリから読み込む処理を飛ばす
+        # 配列の場合のみアドレスが指す先をメモリから読み込む処理を
         if node.type.kind != TYP.ARRAY:
             load( node.size )
         return 
@@ -496,7 +501,7 @@ def gen_lval2( node ):
 
 def gen_addr2( node ):
     
-    global lvas2
+    global lvars2
 
     if node.kind == ND.LVAR2 :
         asmd.pins( node )

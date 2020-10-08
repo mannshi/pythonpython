@@ -22,7 +22,7 @@ answer[19]=1
 answer[20]=1
 answer[21]=1
 answer[22]=1
-answer[23]=100
+answer[23]=15
 
 for n in {1..23};do
     num=`printf "%02d" $n`
